@@ -1,12 +1,14 @@
-# Handball-Schiedsrichter Fragenkatalog
+# Schiri-Trainer
 
 ## Zweck des Projekts
 
 `app/data/fragen.json` enthält den DHB-Regelfragenkatalog Basiswissen
 (Fragen 1–68) und ist die **alleinige Quelle der Wahrheit** (ADR-0001). Darauf
-setzt eine Lern-Webanwendung auf, mit der sich ein Anwärter auf die theoretische
-Prüfung vorbereitet. Der zuvor gepflegte Markdown-Katalog ist nach einer
-maschinell abgeglichenen Konvertierung entfallen; er bleibt über Commit
+setzt der **Schiri-Trainer** auf, eine Webanwendung, mit der sich ein Anwärter
+auf die theoretische Prüfung vorbereitet. Der Katalog ist der Inhalt, der
+Schiri-Trainer die Anwendung; beide Begriffe sind nicht austauschbar. Der
+zuvor gepflegte Markdown-Katalog ist nach einer maschinell abgeglichenen
+Konvertierung entfallen; er bleibt über Commit
 `68bd394` wiederherstellbar.
 
 Daraus folgt: Änderungen am Katalog an maschineller Verarbeitbarkeit und
@@ -93,7 +95,7 @@ Vorgaben stehen ausschließlich in dieser Datei.
 
 ### Issue tracker
 
-Issues leben in GitHub Issues von OLibutzki/handball-schiedsrichter-fragenkatalog, verwaltet über die `gh`-CLI. Siehe `docs/agents/issue-tracker.md`.
+Issues leben in GitHub Issues von OLibutzki/schiri-trainer, verwaltet über die `gh`-CLI. Siehe `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

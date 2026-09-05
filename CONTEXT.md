@@ -1,12 +1,18 @@
-# Schiedsrichter-Fragenkatalog
+# Schiri-Trainer
 
-Der DHB-Regelfragenkatalog für die Schiedsrichter-Grundausbildung als Datenbestand
-sowie eine Webanwendung, mit der sich ein Anwärter auf die theoretische Prüfung
-vorbereitet.
+Übungs- und Prüfungstrainer für den DHB-Regelfragenkatalog: eine Webanwendung,
+mit der sich ein Anwärter auf die theoretische Schiedsrichterprüfung vorbereitet.
+Der Katalog ist der Inhalt, der Schiri-Trainer die Anwendung darum herum.
 
 ## Language
 
 ### Katalog
+
+**Katalog**:
+Der Datenbestand, gegen den geübt und geprüft wird: sämtliche Fragen des DHB mit
+ihren Optionen, gegliedert nach Wissensstufe und Lektion. Der Katalog ist der
+Inhalt des Schiri-Trainers, nicht die Anwendung selbst.
+_Vermeide_: Fragensammlung, Fragenpool, Datenbank
 
 **Frage**:
 Eine Prüfungsaufgabe des DHB-Katalogs mit ihrem Text und ihren Optionen. Über
