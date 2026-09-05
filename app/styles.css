@@ -1,0 +1,187 @@
+/* Mobile-first; am Desktop eine zentrierte Spalte. Helles und dunkles
+   Erscheinungsbild folgen der Systemeinstellung, es gibt keinen Umschalter. */
+
+:root {
+  --grund: #f7f7f8;
+  --flaeche: #ffffff;
+  --schrift: #1b1c1f;
+  --schrift-leise: #5c6069;
+  --rand: #d6d8dd;
+  --akzent: #1f5fa8;
+  --akzent-schrift: #ffffff;
+  --richtig: #1b6b3a;
+  --richtig-grund: #e3f3e9;
+  --falsch: #a32020;
+  --falsch-grund: #fbe6e6;
+  --beruehrziel: 44px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --grund: #15161a;
+    --flaeche: #1f2126;
+    --schrift: #eceef2;
+    --schrift-leise: #a2a7b2;
+    --rand: #383b43;
+    --akzent: #6ea8f0;
+    --akzent-schrift: #10131a;
+    --richtig: #7bd39c;
+    --richtig-grund: #17301f;
+    --falsch: #f08a8a;
+    --falsch-grund: #331919;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--grund);
+  color: var(--schrift);
+  font: 1rem/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.huelle {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1rem 1rem calc(2rem + env(safe-area-inset-bottom));
+}
+
+.kopf h1 {
+  font-size: 1.25rem;
+  margin: 0 0 0.25rem;
+}
+
+.herkunft {
+  margin: 0 0 1.5rem;
+  color: var(--schrift-leise);
+  font-size: 0.8125rem;
+}
+
+.frage-kennung {
+  margin: 0;
+  color: var(--schrift-leise);
+  font-size: 0.8125rem;
+}
+
+.frage-text {
+  font-size: 1.125rem;
+  line-height: 1.4;
+  margin: 0.25rem 0 1.25rem;
+}
+
+.optionen {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-height: var(--beruehrziel);
+  padding: 0.75rem;
+  background: var(--flaeche);
+  border: 1px solid var(--rand);
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.option input {
+  width: 1.375rem;
+  height: 1.375rem;
+  margin: 0;
+  flex: none;
+  accent-color: var(--akzent);
+}
+
+.option-buchstabe {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  color: var(--schrift-leise);
+}
+
+.option--korrekt {
+  border-color: var(--richtig);
+  background: var(--richtig-grund);
+}
+
+.option--falsch-gewaehlt {
+  border-color: var(--falsch);
+  background: var(--falsch-grund);
+}
+
+.option-vermerk {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--schrift-leise);
+}
+
+.hinweis {
+  margin: 0 0 1rem;
+  color: var(--schrift-leise);
+  font-size: 0.8125rem;
+}
+
+.schaltflaeche {
+  min-height: var(--beruehrziel);
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font: inherit;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.schaltflaeche--haupt {
+  background: var(--akzent);
+  color: var(--akzent-schrift);
+}
+
+.schaltflaeche[disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.rueckmeldung {
+  margin-top: 1.5rem;
+}
+
+.rueckmeldung-urteil {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+}
+
+.rueckmeldung--richtig .rueckmeldung-urteil {
+  color: var(--richtig);
+}
+
+.rueckmeldung--falsch .rueckmeldung-urteil {
+  color: var(--falsch);
+}
+
+.rueckmeldung-erlaeuterung {
+  margin: 0 0 1rem;
+  color: var(--schrift-leise);
+  font-size: 0.9375rem;
+}
+
+.meldung {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--rand);
+  background: var(--flaeche);
+}
+
+.meldung--fehler {
+  border-color: var(--falsch);
+  background: var(--falsch-grund);
+  color: var(--falsch);
+}

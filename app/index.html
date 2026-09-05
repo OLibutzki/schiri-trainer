@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Schiedsrichter-Fragenkatalog</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="huelle">
+      <header class="kopf">
+        <h1>Schiedsrichter-Fragenkatalog</h1>
+        <p class="herkunft" id="herkunft"></p>
+      </header>
+
+      <section id="ladefehler" class="meldung meldung--fehler" hidden></section>
+
+      <section id="uebung" hidden>
+        <p class="frage-kennung" id="frage-kennung"></p>
+        <h2 class="frage-text" id="frage-text"></h2>
+
+        <form id="antwort-formular">
+          <ul class="optionen" id="optionen"></ul>
+          <p class="hinweis">Mehrfachauswahl möglich.</p>
+          <button class="schaltflaeche schaltflaeche--haupt" type="submit" id="abgeben">
+            Antwort abgeben
+          </button>
+        </form>
+
+        <section id="rueckmeldung" class="rueckmeldung" hidden aria-live="polite">
+          <p class="rueckmeldung-urteil" id="rueckmeldung-urteil"></p>
+          <p class="rueckmeldung-erlaeuterung" id="rueckmeldung-erlaeuterung"></p>
+          <button class="schaltflaeche schaltflaeche--haupt" type="button" id="weiter">
+            Nächste Frage
+          </button>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
