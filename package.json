@@ -1,0 +1,17 @@
+{
+  "name": "handball-schiedsrichter-fragenkatalog",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Fragenkatalog und Lern-Webanwendung für die DHB-Schiedsrichter-Grundausbildung",
+  "license": "UNLICENSED",
+  "scripts": {
+    "validiere": "node skripte/validiere-katalog.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "typen": "tsc --noEmit",
+    "pruefe": "npm run validiere && npm run test && npm run typen"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

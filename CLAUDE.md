@@ -2,58 +2,75 @@
 
 ## Zweck des Projekts
 
-`fragenkatalog/markdown/` enthält den DHB-Regelfragenkatalog Basiswissen
-(Fragen 1–68) als Markdown. Diese Dateien sind **Datengrundlage für eine noch
-zu bauende Übungs-Anwendung**, kein Lernmaterial zum direkten Durchlesen. Die
-Anwendung existiert bisher nicht.
+`app/data/fragen.json` enthält den DHB-Regelfragenkatalog Basiswissen
+(Fragen 1–68) und ist die **alleinige Quelle der Wahrheit** (ADR-0001). Darauf
+setzt eine Lern-Webanwendung auf, mit der sich ein Anwärter auf die theoretische
+Prüfung vorbereitet. Der zuvor gepflegte Markdown-Katalog ist nach einer
+maschinell abgeglichenen Konvertierung entfallen; er bleibt über Commit
+`68bd394` wiederherstellbar.
 
-Daraus folgt: Änderungen am Katalog an maschineller Parsbarkeit und
-Formatkonsistenz ausrichten, nicht an menschlicher Lesbarkeit. Eine separate
-Lösungsdatei zum „Abdecken" der Antworten wurde ausdrücklich abgelehnt — die
-Lösung steht bewusst direkt bei der Frage.
+Daraus folgt: Änderungen am Katalog an maschineller Verarbeitbarkeit und
+Formatkonsistenz ausrichten, nicht an menschlicher Lesbarkeit. Der Katalog wird
+nicht gelesen, sondern abgefragt.
 
 ## Aufbau
 
 ```
+app/                 Die ausgelieferte Anwendung; genau dieses Verzeichnis geht nach GitHub Pages
+  index.html, styles.css
+  data/fragen.json   Der Katalog
+  js/                Native ES-Module ohne Bundler (ADR-0003)
+skripte/             Ausführbare Hüllen um Anwendungsmodule (Katalogvalidierung)
+tests/               node:test, ohne weitere Werkzeugkette
+docs/                katalogformat.md, adr/, agents/
 fragenkatalog/
-  markdown/        basiswissen-lektion-01..09.md + README.md (Datenformat-Vertrag)
-  quellmaterial/   Theoriefragen_Basiswissen.pdf, Lösungen Prüfungsfragen Basiswissen.pdf
+  quellmaterial/     Theoriefragen_Basiswissen.pdf, Lösungen Prüfungsfragen Basiswissen.pdf
 ```
 
 Die PDFs sind passwortgeschützt und lassen sich **nicht** mit dem Read-Tool
 öffnen. Textextraktion funktioniert über `pdftotext -layout -enc UTF-8`
-(in Git Bash verfügbar).
+(in Git Bash verfügbar). Sie sind Herkunftsbeleg, nicht Datenquelle: Der Katalog
+wird nicht erneut aus ihnen erzeugt.
 
-Lektionsaufteilung: 1–9, 10–15, 16–21, 22–33, 34–40, 41–51, 52–56, 57–61, 62–68.
+Lektionsaufteilung Basiswissen: 1–9, 10–15, 16–21, 22–33, 34–40, 41–51, 52–56,
+57–61, 62–68.
 
-## Datenformat (Vertrag für die App)
+## Datenformat
 
-```markdown
-### <Nr>. <Fragetext>
-
-- a) <Option>
-- b) <Option>
-
-**Lösung: <Buchstabe>)**
-```
-
-Zusicherungen, die durch Prüfskripte bestätigt sind:
-
-- Fragen dateiübergreifend fortlaufend 1–68, jede Nummer genau einmal.
-- Genau eine `**Lösung: …**`-Zeile je Frage, mit genau einem Buchstaben.
-- Optionsbuchstaben laufen lückenlos ab `a)`; der Lösungsbuchstabe liegt immer
-  im tatsächlichen Optionsbereich.
-- Frage und Option stehen je auf einer Zeile (im PDF sind sie umbrochen).
+Beschrieben in `docs/katalogformat.md`, als JSDoc-Typen in `app/js/typen.js`
+notiert und von `pruefeKatalog` (`app/js/validierung.js`) erzwungen. Das Skript
+`skripte/validiere-katalog.mjs` ist nur eine dünne Hülle darum.
 
 **Wichtigste Fallstricke:** Die Optionszahl ist nicht konstant, sie reicht von
 2 bis 6 (5 Fragen mit 2, 30 mit 3, 31 mit 4, Frage 32 mit 5, Frage 9 mit 6).
-Ein auf a–d verdrahteter Parser liegt bei über der Hälfte der Fragen falsch.
+Ein auf a–d verdrahteter Zugriff liegt bei über der Hälfte der Fragen falsch.
+Ebenso wenig ist die Zahl der korrekten Optionen auf eins festgelegt: Das Format
+lässt mehrere zu, auch wenn der heutige Bestand keinen Gebrauch davon macht.
+
+## Prüfstrecke
+
+`npm run pruefe` führt Katalogvalidierung, Tests und Typprüfung zusammen.
+TypeScript ist die einzige devDependency und dient ausschließlich der Prüfung
+der JSDoc-Typen, nie dem Bauen (ADR-0003). Geprüft werden die Anwendungsmodule
+unter `app/js/`; Tests und Skripte bleiben außen vor, weil ihre Node-Importe mit
+`@types/node` eine zweite devDependency verlangt hätten. Bei jeder Änderung an
+der Hauptlinie läuft dieselbe Strecke in GitHub Actions; nur bei fehlerfreiem
+Durchlauf wird `app/` nach GitHub Pages veröffentlicht.
+
+Die Oberfläche wird nicht automatisiert geprüft, sondern manuell im Browser in
+Mobil- und Desktop-Breite abgenommen. Dasselbe gilt für Hash-Routing, Service
+Worker und Tastenkürzel, sobald es sie gibt.
+
+**Einmaliger Schritt des Repository-Inhabers:** Die Pages-Quelle muss in den
+Repository-Einstellungen auf „GitHub Actions" stehen. Ohne ihn schlägt der
+Veröffentlichungsschritt fehl; ein Agent kann ihn nicht ausführen.
 
 ## Verhältnis zum Quell-PDF
 
 Der Katalog wurde vollständig gegen beide PDFs verifiziert: alle 68 Lösungen
 stimmen mit dem Lösungs-PDF überein, die Struktur (68 Fragen + 235 Optionen)
-ist deckungsgleich mit dem Fragen-PDF.
+ist deckungsgleich mit dem Fragen-PDF. Diese Verifikation steckte im Markdown
+und ist mit dem Abgleich der Konvertierung in die Katalogdatei übergegangen.
 
 Bewusste Abweichungen vom PDF-Wortlaut, die **nicht** zurückgesetzt werden
 sollen: Tippfehler des Originals sind korrigiert (u.a. „Aufmerksamt",

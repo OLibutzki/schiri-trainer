@@ -1,0 +1,1861 @@
+{
+  "formatVersion": 1,
+  "metadaten": {
+    "titel": "Regelfragenkatalog Schiedsrichtergrundausbildung",
+    "herkunft": "Regelfragenkatalog zur Durchführung der theoretischen Prüfung in der Schiedsrichtergrundausbildung im DHB",
+    "regelstand": "2025-06-16",
+    "regelnGueltigAb": "2025-07-01",
+    "wissensstufen": [
+      {
+        "id": "basiswissen",
+        "name": "Basiswissen",
+        "reihenfolge": 1
+      }
+    ],
+    "lektionen": [
+      {
+        "id": "basiswissen-1",
+        "wissensstufe": "basiswissen",
+        "nummer": 1,
+        "titel": "Spielfläche, Tore, Spielzeit, Ball"
+      },
+      {
+        "id": "basiswissen-2",
+        "wissensstufe": "basiswissen",
+        "nummer": 2,
+        "titel": "Mannschaft, Auswechslung, Spielkleidung"
+      },
+      {
+        "id": "basiswissen-3",
+        "wissensstufe": "basiswissen",
+        "nummer": 3,
+        "titel": "Spielzeitunterbrechung, Time-out, Team-Time-out"
+      },
+      {
+        "id": "basiswissen-4",
+        "wissensstufe": "basiswissen",
+        "nummer": 4,
+        "titel": "Tor, Anwurf, Einwurf"
+      },
+      {
+        "id": "basiswissen-5",
+        "wissensstufe": "basiswissen",
+        "nummer": 5,
+        "titel": "Spielen des Balles, Freiwurf"
+      },
+      {
+        "id": "basiswissen-6",
+        "wissensstufe": "basiswissen",
+        "nummer": 6,
+        "titel": "Torraum, Abwurf"
+      },
+      {
+        "id": "basiswissen-7",
+        "wissensstufe": "basiswissen",
+        "nummer": 7,
+        "titel": "Ausführung von Würfen"
+      },
+      {
+        "id": "basiswissen-8",
+        "wissensstufe": "basiswissen",
+        "nummer": 8,
+        "titel": "Zeitnehmer und Sekretär"
+      },
+      {
+        "id": "basiswissen-9",
+        "wissensstufe": "basiswissen",
+        "nummer": 9,
+        "titel": "Schiedsrichter, Zusammenarbeit"
+      }
+    ]
+  },
+  "fragen": [
+    {
+      "id": "basiswissen-1",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-1",
+      "nummer": 1,
+      "text": "Welche Abmessungen sehen die Spielregeln für die Spielfläche vor?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "40 x 20 Meter",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "b",
+          "text": "42 x 20 Meter",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "38 x 18 Meter",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Länge zwischen 38 und 42, Breite zwischen 18 und 22 Metern.",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-2",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-1",
+      "nummer": 2,
+      "text": "Welche Höhe und welche Breite (im Lichten) müssen die Tore haben?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "1,92 x 2,92 Meter",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "2,00 x 3,00 Meter",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "2,05 x 3,05 Meter",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "2,08 x 3,08 Meter",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-3",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-1",
+      "nummer": 3,
+      "text": "Wie breit muss die Torlinie zwischen den Torpfosten sein?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "5 cm",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "6 cm",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "8 cm",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "d",
+          "text": "10 cm",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-4",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-1",
+      "nummer": 4,
+      "text": "Wie breit muss die Torauslinie sein?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "5 cm",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "b",
+          "text": "6 cm",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "8 cm",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "10 cm",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-5",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-1",
+      "nummer": 5,
+      "text": "Wer entscheidet in Zweifelsfällen über die Richtigkeit der Zeitmessung?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Zeitnehmer und Sekretär",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Die Schiedsrichter gemeinsam",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Der Zeitnehmer",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Die Schiedsrichter und der Zeitnehmer gemeinsam",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-6",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-1",
+      "nummer": 6,
+      "text": "Wie viele Bälle müssen bei jedem Spiel mindestens vorhanden sein?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Ein Ball ist ausreichend",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Mindestens drei Bälle müssen vorhanden sein",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Dies ist im Regelwerk nicht festgelegt",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Es müssen mindestens zwei Bälle vorhanden sein",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-7",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-1",
+      "nummer": 7,
+      "text": "Wie viele Farben darf der Spielball haben?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "1",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "2",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "3",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Beliebig viele",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-8",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-1",
+      "nummer": 8,
+      "text": "Die normale Spielzeit für Jugendmannschaften von 12–16 Jahren beträgt:",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "2 x 30 Minuten",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "2 x 20 Minuten",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "2 x 25 Minuten",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-9",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-1",
+      "nummer": 9,
+      "text": "Das automatische Schlusssignal der Zeitmessanlage ist defekt. Wer darf in diesem Fall das Schlusssignal geben?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Nur der Sekretär",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Nur der Feldschiedsrichter",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Nur der Delegierte",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Nur einer der Schiedsrichter",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "e",
+          "text": "Nur der Zeitnehmer",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "f",
+          "text": "Einer der SR, der Zeitnehmer oder der Delegierte",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-10",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-2",
+      "nummer": 10,
+      "text": "Vier Konstellationen: Welcher Spieler ist teilnahmeberechtigt?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Bei Spielbeginn anwesend und im Spielprotokoll eingetragen",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "b",
+          "text": "Bei Spielbeginn nicht anwesend, aber im Spielprotokoll eingetragen",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Bei Spielbeginn anwesend, aber nicht im Spielprotokoll eingetragen",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Ein Spieler, der zwar nicht im Spielprotokoll eingetragen ist, aber vom Zeitnehmer die Spielerlaubnis erhält",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-11",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-2",
+      "nummer": 11,
+      "text": "Wie viele Spieler der angreifenden Mannschaft müssen mindestens bei Spielbeginn auf der Spielfläche antreten und im Spielprotokoll eingetragen sein?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "6 Feldspieler",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "4 Feldspieler und 1 Torwart",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "5 Spieler",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "d",
+          "text": "5 Feldspieler und 1 Torwart",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-12",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-2",
+      "nummer": 12,
+      "text": "Worauf ist bei einem Wechselvorgang zu achten?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Bei Time-out ist keine besondere Aufmerksamkeit erforderlich, da die Auswechselregeln nicht gelten",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Der auszuwechselnde Spieler kann das Spielfeld auch außerhalb der eigenen Auswechsellinie verlassen",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Der auszuwechselnde Spieler muss das Spielfeld zunächst über die eigene Auswechsellinie verlassen, erst dann darf der einwechselnde Spieler ebenfalls nur über die eigene Auswechsellinie das Spielfeld betreten",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "d",
+          "text": "Der einwechselnde Spieler kann nur über die eigene Auswechsellinie das Spielfeld betreten, aber bevor der auszuwechselnde Spieler das Spielfeld vollständig verlassen hat",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-13",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-2",
+      "nummer": 13,
+      "text": "Wann ist es bis zu zwei Personen (Offiziellen und/oder Spielern) einer Mannschaft gestattet, die Spielfläche zusätzlich zu betreten?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Während einer Spielzeitunterbrechung",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Während einer Spielzeitunterbrechung und mit Erlaubnis eines Schiedsrichters (Handzeichen 16)",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Bei Verletzung eines Spielers",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Mit Erlaubnis des Zeitnehmers",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-14",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-2",
+      "nummer": 14,
+      "text": "Die Schiedsrichter geben das Zeichen zum Betreten der Spielfläche (Handzeichen 16), da sich ein Spieler von A verletzt hat. Wer darf die Spielfläche betreten?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Zwei Offizielle von A, sonst niemand",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Je zwei Offizielle beider Mannschaften",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Zwei Personen (Offizielle oder Spieler) von A",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "d",
+          "text": "Zwei Personen (Offizielle oder Spieler) von beiden Mannschaften",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-15",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-2",
+      "nummer": 15,
+      "text": "Was ist bezüglich der Spielkleidung richtig?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Torwart und Spieler einer Mannschaft müssen eine identische Trikotfarbe benutzen",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Die Spieler müssen auf der Trikotrückseite mindestens 20 cm und auf der Trikotvorderseite mindestens 10 cm hohe sichtbare Nummern haben",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Die Farbe schwarz ist ausschließlich den Schiedsrichtern vorbehalten",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-16",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-3",
+      "nummer": 16,
+      "text": "Wann ist die Spielzeit verbindlich zu unterbrechen?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Ein Spieler scheint verletzt zu sein",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Hinausstellungen und Disqualifikationen",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Bei Einwirkungen von außen auf das Spiel",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Eine Mannschaft verzögert offenkundig die Ausführung eines formellen Wurfs",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-17",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-3",
+      "nummer": 17,
+      "text": "In welcher dieser Situationen ist nicht verbindlich Time-out zu geben?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Ein Spieler scheint verletzt zu sein",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "b",
+          "text": "Hinausstellung",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Disqualifikation",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "notwendige Rücksprache zwischen den Schiedsrichtern entsprechend Regel 17:6, 17:7",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-18",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-3",
+      "nummer": 18,
+      "text": "Wer meldet das Team-Time-out an?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Ein Offizieller",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "b",
+          "text": "Ein Spieler",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Nur der Mannschaftsverantwortliche",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Der Mannschaftskapitän",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-19",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-3",
+      "nummer": 19,
+      "text": "Mannschaft A ist in Ballbesitz; ein Mannschaftsoffizieller von B meldet beim Zeitnehmer Team-Time-out an, indem er die Grüne Karte auf den Zeitnehmertisch legt. Richtige Entscheidung?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Die Grüne Karte wird am Zeitnehmertisch aufgestellt",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Der Zeitnehmer pfeift, sobald B in Ballbesitz gelangt",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Der Zeitnehmer gibt die Grüne Karte zurück",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "d",
+          "text": "Nur der Mannschaftsverantwortliche darf Team-Time-out anmelden",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-20",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-3",
+      "nummer": 20,
+      "text": "Für den Fall, dass jede Mannschaft während der regulären Spielzeit Anspruch auf insgesamt drei Team-Time-outs hat, gilt für die letzten fünf Minuten der regulären Spielzeit folgende Regel:",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Innerhalb der letzten fünf Minuten der regulären Spielzeit sind noch zwei Team-Time-out für jede Mannschaft erlaubt",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Innerhalb der letzten fünf Minuten der regulären Spielzeit ist kein Team-Time-out mehr erlaubt",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Innerhalb der letzten fünf Minuten der regulären Spielzeit ist nur ein Team-Time-out für jede Mannschaft erlaubt",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-21",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-3",
+      "nummer": 21,
+      "text": "Für den Zeitpunkt der Beantragung eines Team-Time-out ist nachfolgendes richtig:",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Ein Team-Time-out kann auch beantragen, wer nicht in Ballbesitz ist",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Auch wenn der Antragsteller den Ballbesitz zuvor verloren hat, kann er noch ein Team-Time-out beantragen",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Ein Team-Time-out kann nur beantragen, wer in Ballbesitz ist (Ball im Spiel oder bei Spielunterbrechung)",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-22",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-4",
+      "nummer": 22,
+      "text": "Torwart WEISS 1 hält den Ball, der die Torlinie zu drei Vierteln passiert hat, auf der Torlinie fest. Wie ist zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Tor",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "kein Tor",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-23",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-4",
+      "nummer": 23,
+      "text": "Abwehrspieler WEISS 9 versucht, einen Wurf mit dem Unterschenkel abzuwehren, der Ball geht aber ins Tor. Wie ist zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "kein Tor",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Tor",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-24",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-4",
+      "nummer": 24,
+      "text": "Wann kann der Anwurf angepfiffen werden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "wenn sich mindestens ein Fuß des Werfers innerhalb der Anwurfzone befindet",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "wenn sich der Ball und der Werfer vollständig in der Anwurfzone befinden",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "wenn sich der Werfer vollständig in der Anwurfzone befindet, aber der Ball noch außerhalb der Anwurfzone ist",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-25",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-4",
+      "nummer": 25,
+      "text": "Kurz vor Spielende erzielt der Gastverein das 15:16. Der Heimverein will einen schnellen Anwurf ausführen. Der Ausführende steht mit beiden Füßen außerhalb der Anwurfzone. Wie lautet die richtige Entscheidung?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Stellung ist nicht korrekt, Korrektur durch den Schiedsrichter erforderlich, danach Anpfiff des Anwurfs",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "b",
+          "text": "Da die Stellung korrekt ist, pfeift der Schiedsrichter den Anwurf an",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Time-out, Stellung ist nicht korrekt, Korrektur durch den Schiedsrichter, danach Anpfiff des Anwurfs",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-26",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-4",
+      "nummer": 26,
+      "text": "Welche der folgenden Aussagen zum Anwurf sind richtig?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Die Mitspieler des anwerfenden Spielers dürfen die Mittellinie überschreiten, bevor der Anwurf angepfiffen wurde",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Beim Anwurf zu Beginn jeder Halbzeit (und eventueller Verlängerungen) müssen sich nur die Spieler der angreifenden Mannschaften in der eigenen Hälfte der Spielfläche befinden.",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Beim Anwurf nach einem Tor können sich die Gegenspieler des Werfers in beiden Hälften der Spielfläche aufhalten.",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-27",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-4",
+      "nummer": 27,
+      "text": "Welche der folgenden Aussagen zur Ausführung des Anwurfs sind richtig?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Der Werfer darf die Anwurfzonenlinie mit keinem Körperteil überschreiten, bevor der Wurf als ausgeführt gilt.",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "b",
+          "text": "Der Anwurf ist aus der Anwurfzone innerhalb fünf Sekunden nach Anpfiff in beliebiger Richtung auszuführen.",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Die Mitspieler des Werfers dürfen die Mittellinie schon vor dem Anpfiff überqueren.",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Der Werfer darf bei der Ausführung des Anwurfs auch springen",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-28",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-4",
+      "nummer": 28,
+      "text": "Wann ist auf Einwurf zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Der Ball hat die Seitenlinie nicht vollständig überquert",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Der Ball überquert die Torauslinie und ist zuletzt von einem Spieler der angreifenden Mannschaft berührt worden",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Der Ball berührt die Hallendecke über der Spielfläche",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-29",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-4",
+      "nummer": 29,
+      "text": "Spieler A3 führt einen Einwurf zwei Meter außerhalb der Seitenlinie aus. Richtige Entscheidung?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Weiterspielen lassen – ist erlaubt",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Nicht korrekt – daher Freiwurf für die andere Mannschaft",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Nicht korrekt – Korrektur und Wiederholung des Einwurfs",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Nicht korrekt – Korrektur und Wiederholung des Einwurfs mit Anpfiff",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-30",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-4",
+      "nummer": 30,
+      "text": "Spieler SCHWARZ 4 steht mit einem Fuß auf der Seitenlinie, mit dem anderen im Spielfeld und trifft mit seinem Einwurf direkt ins Tor. Wie ist zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Stellung nicht korrekt, Freiwurf für die gegnerische Mannschaft",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Stellung korrekt, Tor",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Stellung nicht korrekt, Einwurf für SCHWARZ mit Anpfiff wiederholen lassen",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-31",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-4",
+      "nummer": 31,
+      "text": "Spieler WEISS 6 führt, mit einem Fuß im und mit dem anderen außerhalb des Spielfelds stehend, einen Einwurf aus und trifft direkt ins Tor von Team SCHWARZ.",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Stellung nicht korrekt, Korrektur erforderlich, Wiederholung Einwurf für WEISS nach Anpfiff",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "b",
+          "text": "Stellung nicht korrekt, Freiwurf für die andere Mannschaft",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Stellung korrekt, Tor",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-32",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-4",
+      "nummer": 32,
+      "text": "Es erfolgt ein Wurf von WEISS 3 auf das Tor von Team SCHWARZ. Der Ball prallt unmittelbar von der Latte gegen ein Sportgerät an der Hallendecke über dem Torraum von Team SCHWARZ. Von dort fällt er direkt in die fangbereiten Arme des Torwarts. Wie ist zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Weiterspielen lassen",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Einwurf für WEISS",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Einwurf für SCHWARZ mit Anpfiff",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Einwurf für SCHWARZ",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "e",
+          "text": "Time-out verbindlich erforderlich",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-33",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-4",
+      "nummer": 33,
+      "text": "Spieler WEISS 4 steht korrekt zur Ausführung eines Einwurfs bereit. Da er gerade keinen anspielbaren Mitspieler sieht, prellt er den Ball einmal im Spielfeld auf. Richtige Entscheidung?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Freiwurf für die andere Mannschaft ohne Anpfiff",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "b",
+          "text": "Wiederholung des Einwurfs für WEISS mit Anpfiff",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Weiterspielen lassen da erlaubt",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-34",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-5",
+      "nummer": 34,
+      "text": "Welche Aussage bezüglich Spielen des Balles ist korrekt?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Es ist erlaubt den Ball maximal 4 Sekunden zu halten, auch wenn dieser auf dem Boden liegt.",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Es ist erlaubt sich mit dem Ball höchstens 4 Schritte zu bewegen.",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Es ist erlaubt den Ball maximal 3 Sekunden zu halten, auch wenn dieser auf dem Boden liegt.",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "d",
+          "text": "Es ist erlaubt sich mit dem Ball höchstens 2 Schritte zu bewegen.",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-35",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-5",
+      "nummer": 35,
+      "text": "SCHWARZ 6 fängt den Ball, rutscht aus und kommt zu Fall. Auf dem Rücken liegend spielt er zu SCHWARZ 9 weiter. Wie ist zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Freiwurf für Team WEISS",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Weiterspielen lassen",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Freiwurf für Team SCHWARZ",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-36",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-5",
+      "nummer": 36,
+      "text": "WEISS 3 läuft zwischen zwei Gegenspieler und lupft den Ball vorwärts in die eigene Laufrichtung. Bevor der Ball den Boden berührt, fängt er ihn und hat jetzt freie Bahn. Nach einmaligem Tippen wirft er den Ball ins Tor. Wie ist zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Tor",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Freiwurf für Team SCHWARZ",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Freiwurf für Team WEISS",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-37",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-5",
+      "nummer": 37,
+      "text": "WEISS 10 versucht ein Kreisanspiel zu WEISS 8. Der vor diesem stehende Abwehrspieler SCHWARZ 10 wird von dem Ball am Fuß getroffen. Richtige Entscheidung?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Freiwurf für WEISS",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Weiterspielen lassen",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Entscheidend ist, wer in Ballbesitz kommt",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-38",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-5",
+      "nummer": 38,
+      "text": "Nach einem Wurf von WEISS 4 prallt der Ball vom Pfosten ab, trifft den neben dem Tor im Torraum stehenden Schiedsrichter und überquert deshalb nicht die Torauslinie von Team SCHWARZ, sondern die Seitenlinie. Wie ist zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Freiwurf für Team WEISS",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Einwurf für Team SCHWARZ",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Einwurf für Team WEISS",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-39",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-5",
+      "nummer": 39,
+      "text": "Welche der folgenden Aussagen zum Ausführungsort eines Freiwurfs ist richtig?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Wird der Ball nach einer Freiwurfentscheidung nicht sofort niedergelegt, darf der Gegner den Wurf dort ausführen, wo der Ball sich befindet",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Ein Freiwurf darf auch im eigenen Torraum oder zwischen Freiwurf- und Torraumlinie der gegnerischen Mannschaft ausgeführt werden",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Bei der Freiwurfausführung gibt es keine Toleranzgrenze",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Bei einem Freiwurf in Höhe der Mittellinie ist die Toleranz noch bis 1,50 Meter.",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-40",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-5",
+      "nummer": 40,
+      "text": "Welche der folgenden Aussagen zur Ausführung eines Freiwurfs ist richtig?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Spieler der werfenden Mannschaft dürfen die Freiwurflinie nicht berühren oder überschreiten, bevor der Ball die Hand des Werfers verlassen hat.",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "b",
+          "text": "Bei der Ausführung eines Freiwurfs muss die Abwehr mindestens 2 Meter vom Werfer entfernt stehen.",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Befinden sich Angriffsspieler vor Ausführung des Freiwurfs zwischen Torraum- und Freiwurflinie, müssen die Schiedsrichter dies nicht korrigieren, auch wenn es Einfluss auf das Spiel hat.",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-41",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-6",
+      "nummer": 41,
+      "text": "WEISS 7 befindet sich beim Absprung außerhalb des Torraums von Team SCHWARZ, fängt den Ball jedoch deutlich über dem Torraum und wirft ihn noch in der Luft befindlich ins Tor. Wie ist zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Tor für Team WEISS",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "b",
+          "text": "Freiwurf für Team SCHWARZ",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Abwurf für Team SCHWARZ",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Abwurf für Team SCHWARZ mit Anpfiff",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-42",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-6",
+      "nummer": 42,
+      "text": "Angreifer WEISS 7 betritt mit Ball den gegnerischen Torraum von SCHWARZ. Wie ist zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Freiwurf für Team SCHWARZ",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Abwurf für Team SCHWARZ",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Abwurf für Team SCHWARZ mit Anpfiff",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Freiwurf für Team SCHWARZ mit Anpfiff",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-43",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-6",
+      "nummer": 43,
+      "text": "Abwehrspieler WEISS 8, der von einigen Gegenspielern von SCHWARZ korrekt bedrängt wird, rollt den Ball absichtlich in den eigenen Torraum, wo er liegen bleibt. Torwart WEISS 12 nimmt ihn nicht auf. Richtige Entscheidung?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Abwurf WEISS",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Abwurf WEISS mit Anpfiff",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "7-Meter-Wurf für SCHWARZ",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Freiwurf für SCHWARZ",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-44",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-6",
+      "nummer": 44,
+      "text": "WEISS 10 führt nach einem Torerfolg von Team SCHWARZ den Anwurf aus. Da er keinen anspielbaren Feldspieler sieht, überrascht er seinen Torwart WEISS 12, der im Torraum steht, mit einem Rückpass. WEISS 12 nimmt den Ball auf und spielt zu WEISS 9. Wie ist zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Weiterspielen lassen",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "7-Meter-Wurf für Team SCHWARZ",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Freiwurf für Team SCHWARZ",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "d",
+          "text": "Wiederholung des Anwurfs nach Korrektur",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-45",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-6",
+      "nummer": 45,
+      "text": "Der Torraum gilt als verlassen,",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "sobald der Torwart mit irgendeinem Körperteil den Boden außerhalb der Torraumlinie berührt",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "b",
+          "text": "erst wenn der Torwart sich komplett (mit allen Körperteilen) außerhalb der Torraumlinie befindet",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-46",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-6",
+      "nummer": 46,
+      "text": "Torwart SCHWARZ 1 kann einen Torwurf abfangen und den Gegenstoß einleiten. Dabei überschreitet er mit dem linken Fuß die Torraumlinie. Wie ist zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Weiterspielen lassen",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Freiwurf für Team WEISS",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Wiederholung des Abwurfs mit Anpfiff",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-47",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-6",
+      "nummer": 47,
+      "text": "Wann ist ein Abwurf ausgeführt und darf von einem Feldspieler gespielt werden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Während der Ball sich noch über dem Torraum befindet",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Wenn der vom Torwart gespielte Ball die Torraumlinie vollständig überquert hat",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Wenn der Ball die Hand des Torwarts verlassen hat",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-48",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-6",
+      "nummer": 48,
+      "text": "Welche Aussage bezüglich des Abwurfs ist richtig?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Der Abwurf ist ausgeführt, wenn der Ball die Hand des Torwarts verlassen hat",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Beim Abwurf müssen die Gegenspieler den 3-Meter-Abstand einhalten",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Der Torwart darf den Abwurf auch im Sprung ausführen",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-49",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-6",
+      "nummer": 49,
+      "text": "Torwart WEISS 12 steht außerhalb seines Torraums im Spielfeld. Bei einem Zuspiel durch einen Mitspieler setzt er beim Zurückgehen einen Fuß in den eigenen Torraum, während der andere Fuß noch auf dem Spielfeld steht. Wie ist zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "7-Meter-Wurf für Team SCHWARZ",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Weiterspielen lassen",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Freiwurf für Team SCHWARZ",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "d",
+          "text": "Hinausstellung des Torwarts",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-50",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-6",
+      "nummer": 50,
+      "text": "Der Ball rollt im Torraum von Mannschaft WEISS. SCHWARZ 8 nimmt ihn auf und erzielt ein Tor. Richtige Entscheidung?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Freiwurf für WEISS",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Abwurf für WEISS",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Tor für SCHWARZ",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-51",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-6",
+      "nummer": 51,
+      "text": "Der Ball liegt direkt außerhalb des Torraums von Team WEISS. Torwart WEISS 1 steht innerhalb des Torraums und nimmt den Ball auf, um zu verhindern, dass ein gegnerischer Spieler ihn aufnehmen kann. Wie ist zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Freiwurf für Team SCHWARZ",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "b",
+          "text": "7-Meter-Wurf für Team SCHWARZ",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Progressive Bestrafung von WEISS 1",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Nicht eingreifen, keine Regelwidrigkeit",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-52",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-7",
+      "nummer": 52,
+      "text": "Mit welchem der folgenden Würfe kann kein Eigentor erzielt werden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Abwurf",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "b",
+          "text": "Freiwurf",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Einwurf",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Anwurf",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-53",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-7",
+      "nummer": 53,
+      "text": "Welche Aussage zur Ausführung von Würfen ist korrekt?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Der Ball darf während einer Wurfausführung von einem Mitspieler berührt oder diesem übergeben werden.",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Abwehrspieler müssen den jeweils vorgeschriebenen Mindestabstand zum Werfer so lange einhalten, bis der Ball die Hand des Werfers verlassen hat.",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Regelwidrigkeiten des Werfers oder seiner Mitspieler vor der Wurfausführung müssen nicht korrigiert werden.",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-54",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-7",
+      "nummer": 54,
+      "text": "Welche Aussage zur Ausführung von Würfen ist falsch?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Ein Werfer muss die vorgeschriebene Ausgangsposition so lange einnehmen, bis der Ball seine Hand verlassen hat!",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Toleranzbereiche sind abhängig vom Ausführungsort: Je weiter das gegnerische Tor entfernt ist, umso genauer muss der Ort der Wurfausführung dem des Vergehens entsprechen!",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Abwehrspieler, die die Wurfausführung stören, müssen unabhängig davon, ob ein Wurf anzupfeifen war oder nicht, bestraft werden.",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-55",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-7",
+      "nummer": 55,
+      "text": "Der Torwart von Team SCHWARZ hat einen Wurf gehalten und will sofort einen Gegenstoß einleiten. Dabei entgleitet ihm der Ball und rollt ins Tor. Wie ist zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Tor für Team WEISS",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Wiederholung des Abwurfs mit Anpfiff",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Einwurf für Team WEISS",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Freiwurf für Team WEISS",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-56",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-7",
+      "nummer": 56,
+      "text": "Team SCHWARZ will einen Freiwurf ausführen. WEISS 11 steht nur zwei Meter entfernt und versucht, die Ausführung zu stören. Wie ist zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Strafe gegen WEISS 11, Freiwurf für Team SCHWARZ mit Anpfiff",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "b",
+          "text": "Freiwurf für Team WEISS mit Anpfiff",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Stellung korrekt, keine Maßnahme erforderlich",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-57",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-8",
+      "nummer": 57,
+      "text": "Welche der folgenden Vorgabe trifft das Regelwerk hinsichtlich der Aufgabenteilung von Zeitnehmer und Sekretär?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Die Kontrolle des Aus- und Eintretens der Auswechselspieler ist dem Zeitnehmer vorbehalten.",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Generell sollten alle notwendigen Spielunterbrechungen vom Zeitnehmer vorgenommen werden.",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Erkennt der Sekretär ein verfrühtes Eintreten eines Auswechselspielers, muss er pfeifen.",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-58",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-8",
+      "nummer": 58,
+      "text": "Der Zeitnehmer hat die Hauptverantwortung für",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "die Spielzeit",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "b",
+          "text": "das Spielprotokoll (elektronischer Spielbericht)",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Spielerlisten",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-59",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-8",
+      "nummer": 59,
+      "text": "Der Sekretär hat die Hauptverantwortung für",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "die Überwachung der Wiedereintrittszeit hinausgestellter Spieler",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "die Bedienung der Zeitmessanlage",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "das Eintreten von nicht teilnahmeberechtigten Spielern",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-60",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-8",
+      "nummer": 60,
+      "text": "Bei Wechselfehlern hat der Zeitnehmer",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "keine Aufgaben, dafür ist allein der Sekretär verantwortlich",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "sofort ohne Berücksichtigung einer eventuell bestehenden Vorteilssituation zu pfeifen und die Spielzeit anzuhalten",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "eine eventuell bestehende Vorteilssituation erst abzuwarten und dann zu pfeifen und die Spielzeit anzuhalten",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-61",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-8",
+      "nummer": 61,
+      "text": "Wer entscheidet in Zweifelsfällen über die Richtigkeit der Zeitmessung?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Zeitnehmer und Sekretär gemeinsam",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Die Schiedsrichter gemeinsam",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Allein der Zeitnehmer",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Die Schiedsrichter und der Sekretär gemeinsam",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-62",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-9",
+      "nummer": 62,
+      "text": "Spielbeginn: Welcher Schiedsrichter wird Feld- bzw. Torschiedsrichter?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Der in der Ansetzung Erstgenannte wird Feldschiedsrichter",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Der in der Ansetzung Erstgenannte wird Torschiedsrichter",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Die Schiedsrichter losen, wer auf welcher Position beginnt",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Freie Entscheidung der Schiedsrichter",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-63",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-9",
+      "nummer": 63,
+      "text": "Die Schiedsrichter sind hinsichtlich der verbleibenden Spielzeit unterschiedlicher Auffassung. Im Gespräch will der Torschiedsrichter (Erstgenannter) zunächst 50 Sekunden spielen lassen, der Feldschiedsrichter 42 Sekunden. Wie ist zu entscheiden?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Die längere Spielzeit (50 Sekunden) ist gültig.",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Der Erstgenannte ist zuständig (50 Sekunden).",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Der Feldschiedsrichter ist zuständig (42 Sekunden).",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "d",
+          "text": "Die beiden Schiedsrichter müssen sich einigen.",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-64",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-9",
+      "nummer": 64,
+      "text": "Wer pfeift alle Würfe an, die zwingend (15:5) oder nach seiner Beurteilung anzupfeifen sind?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Torschiedsrichter",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Feldschiedsrichter",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Beide müssen sich einigen",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-65",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-9",
+      "nummer": 65,
+      "text": "Hauptsächlicher Beobachtungsbereich des Torschiedsrichters ist",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "das Spielgeschehen vor allem auf den Rückraumpositionen",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Aktionen entlang der Torraumlinie",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-66",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-9",
+      "nummer": 66,
+      "text": "Welche Spielsituation ist für einen Funktions- bzw. Seitenwechsel besonders geeignet?",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Nach einem Torerfolg",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "7-m-Wurf",
+          "korrekt": true
+        },
+        {
+          "buchstabe": "c",
+          "text": "Nach einer Freiwurfentscheidung",
+          "korrekt": false
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-67",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-9",
+      "nummer": 67,
+      "text": "Für die Entscheidung Tor oder kein Tor ist in erster Linie verantwortlich",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Der Feldschiedsrichter",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Der Torschiedsrichter",
+          "korrekt": true
+        }
+      ]
+    },
+    {
+      "id": "basiswissen-68",
+      "wissensstufe": "basiswissen",
+      "lektion": "basiswissen-9",
+      "nummer": 68,
+      "text": "Die richtige Aktionsfolge bei einem Torerfolg ist wie folgt:",
+      "optionen": [
+        {
+          "buchstabe": "a",
+          "text": "Ball im Tor: Torschiedsrichter hebt sofort den Arm und pfeift zweimal, der Torschiedsrichter wird zum Feldschiedsrichter und pfeift den Anwurf an",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "b",
+          "text": "Ball im Tor: Blickkontakt Feldschiedsrichter – Torschiedsrichter, Torschiedsrichter hebt zum Zeichen der Zustimmung den gestreckten Arm, Feldschiedsrichter hebt ebenfalls den Arm und pfeift zweimal, der Torschiedsrichter wird zum Feldschiedsrichter und pfeift den Anwurf an",
+          "korrekt": false
+        },
+        {
+          "buchstabe": "c",
+          "text": "Ball im Tor: Blickkontakt Feldschiedsrichter – Torschiedsrichter, Feldschiedsrichter hebt zum Zeichen der Zustimmung den gestreckten Arm, Torschiedsrichter hebt ebenfalls den Arm und pfeift zweimal, der Torschiedsrichter wird zum Feldschiedsrichter und pfeift den Anwurf an",
+          "korrekt": true
+        }
+      ]
+    }
+  ]
+}
