@@ -1,0 +1,58 @@
+name: Prüfstrecke und Veröffentlichung
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  pruefen:
+    name: Prüfstrecke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Katalog validieren
+        run: npm run validiere
+      - name: Tests
+        run: npm test
+      - name: Typen prüfen
+        run: npm run typen
+
+  veroeffentlichen:
+    name: Nach GitHub Pages veröffentlichen
+    # Nur bei fehlerfreier Prüfstrecke und nur auf der Hauptlinie.
+    needs: pruefen
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - name: Anwendung hochladen
+        # Ausgeliefert wird `app/` unveraendert; es gibt keinen Build-Schritt (ADR-0003),
+        # und die Katalogdatei liegt bereits darin, damit Daten und Anwendung nicht
+        # auseinanderlaufen koennen.
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: app
+      - id: deployment
+        uses: actions/deploy-pages@v4

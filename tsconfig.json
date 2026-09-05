@@ -1,0 +1,16 @@
+{
+  "//": "TypeScript dient ausschließlich der Prüfung der JSDoc-Typen, nie dem Bauen (ADR-0003).",
+  "//include": "Nur die Anwendungsmodule: Tests und Skripte greifen auf Node-Module zu, deren Typen eine zweite devDependency (@types/node) verlangen würden.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["app/js/**/*.js"]
+}
