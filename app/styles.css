@@ -55,7 +55,7 @@ body {
 }
 
 .herkunft {
-  margin: 0 0 1.5rem;
+  margin: 0;
   color: var(--schrift-leise);
   font-size: 0.8125rem;
 }
@@ -130,9 +130,18 @@ body {
 }
 
 .schaltflaeche {
+  /* Auch Verweise treten als Schaltflaeche auf; deshalb Flexbox statt
+     text-align, damit die Beschriftung in beiden Faellen mittig sitzt. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-height: var(--beruehrziel);
   width: 100%;
   padding: 0.75rem 1rem;
+  background: var(--flaeche);
+  color: inherit;
+  border-color: var(--rand);
+  text-decoration: none;
   font: inherit;
   font-weight: 600;
   border-radius: 0.5rem;
@@ -143,6 +152,7 @@ body {
 .schaltflaeche--haupt {
   background: var(--akzent);
   color: var(--akzent-schrift);
+  border-color: transparent;
 }
 
 .schaltflaeche[disabled] {
@@ -184,4 +194,155 @@ body {
   border-color: var(--falsch);
   background: var(--falsch-grund);
   color: var(--falsch);
+}
+
+.navigation {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.75rem 0 1.5rem;
+}
+
+.navigation a {
+  flex: 1;
+  min-height: var(--beruehrziel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border: 1px solid var(--rand);
+  border-radius: 0.5rem;
+  background: var(--flaeche);
+  color: var(--schrift-leise);
+  text-decoration: none;
+  font-size: 0.9375rem;
+}
+
+.navigation-verweis--aktiv {
+  border-color: var(--akzent);
+  color: var(--akzent);
+  font-weight: 600;
+}
+
+.ansicht h2 {
+  font-size: 1.125rem;
+  margin: 0 0 0.75rem;
+}
+
+.ansicht h3 {
+  font-size: 1rem;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.lernfortschritt-zahl {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.lernfortschritt-balken {
+  width: 100%;
+  height: 0.5rem;
+  margin: 0.5rem 0;
+  border: none;
+  border-radius: 0.25rem;
+  background: var(--rand);
+  accent-color: var(--akzent);
+}
+
+.lernfortschritt-balken::-webkit-progress-bar {
+  background: var(--rand);
+  border-radius: 0.25rem;
+}
+
+.lernfortschritt-balken::-webkit-progress-value {
+  background: var(--akzent);
+  border-radius: 0.25rem;
+}
+
+.lernfortschritt-erlaeuterung {
+  margin: 0 0 1.5rem;
+  color: var(--schrift-leise);
+  font-size: 0.9375rem;
+}
+
+.schaltflaechen {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.schaltflaeche--gefahr {
+  border-color: var(--falsch);
+  color: var(--falsch);
+}
+
+.aufschluesselung {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.aufschluesselung li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 0.75rem;
+}
+
+.aufschluesselung .lernfortschritt-balken {
+  grid-column: 1 / -1;
+  margin: 0.25rem 0 0;
+}
+
+.aufschluesselung-name {
+  font-size: 0.9375rem;
+}
+
+.aufschluesselung-zahl {
+  color: var(--schrift-leise);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.problemfragen {
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.problemfragen li {
+  padding: 0.75rem;
+  background: var(--flaeche);
+  border: 1px solid var(--rand);
+  border-radius: 0.5rem;
+}
+
+.problemfrage-kennung {
+  display: block;
+  color: var(--schrift-leise);
+  font-size: 0.8125rem;
+}
+
+.problemfrage-text {
+  display: block;
+  font-size: 0.9375rem;
+}
+
+.meldung--hinweis {
+  margin-bottom: 1.5rem;
+}
+
+.fuss {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rand);
 }
