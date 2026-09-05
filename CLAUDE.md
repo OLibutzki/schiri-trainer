@@ -71,3 +71,17 @@ Beschreibungen, Kommentare etc.) werden auf Deutsch verfasst.
 
 Für dieses Projekt wird kein persistentes Claude-Memory genutzt. Kontext und
 Vorgaben stehen ausschließlich in dieser Datei.
+
+## Agent skills
+
+### Issue tracker
+
+Issues leben in GitHub Issues von OLibutzki/handball-schiedsrichter-fragenkatalog, verwaltet über die `gh`-CLI. Siehe `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Standard-Label-Vokabular (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix), unverändert übernommen. Siehe `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-Context-Layout: `CONTEXT.md` (Glossar) und `docs/adr/` im Repo-Root. Siehe `docs/agents/domain.md`.
