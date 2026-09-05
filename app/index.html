@@ -8,35 +8,80 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="huelle">
+    <div class="huelle">
       <header class="kopf">
         <h1>Schiri-Trainer</h1>
-        <p class="herkunft" id="herkunft"></p>
+        <nav class="navigation" id="navigation" aria-label="Ansichten">
+          <a href="#/" data-ansicht="start">Start</a>
+          <a href="#/ueben" data-ansicht="ueben">Üben</a>
+          <a href="#/lernfortschritt" data-ansicht="lernfortschritt">Lernfortschritt</a>
+        </nav>
       </header>
 
       <section id="ladefehler" class="meldung meldung--fehler" hidden></section>
+      <section id="lernstandhinweis" class="meldung meldung--hinweis" hidden></section>
 
-      <section id="uebung" hidden>
-        <p class="frage-kennung" id="frage-kennung"></p>
-        <h2 class="frage-text" id="frage-text"></h2>
-
-        <form id="antwort-formular">
-          <ul class="optionen" id="optionen"></ul>
-          <p class="hinweis">Mehrfachauswahl möglich.</p>
-          <button class="schaltflaeche schaltflaeche--haupt" type="submit" id="abgeben">
-            Antwort abgeben
-          </button>
-        </form>
-
-        <section id="rueckmeldung" class="rueckmeldung" hidden aria-live="polite">
-          <p class="rueckmeldung-urteil" id="rueckmeldung-urteil"></p>
-          <p class="rueckmeldung-erlaeuterung" id="rueckmeldung-erlaeuterung"></p>
-          <button class="schaltflaeche schaltflaeche--haupt" type="button" id="weiter">
-            Nächste Frage
-          </button>
+      <main>
+        <section id="ansicht-start" class="ansicht" hidden>
+          <h2>Lernfortschritt</h2>
+          <p class="lernfortschritt-zahl"><span id="start-anteil">0 %</span></p>
+          <progress class="lernfortschritt-balken" id="start-balken" max="1" value="0"></progress>
+          <p class="lernfortschritt-erlaeuterung" id="start-erlaeuterung"></p>
+          <div class="schaltflaechen">
+            <a class="schaltflaeche schaltflaeche--haupt" href="#/ueben">Üben</a>
+            <a class="schaltflaeche" href="#/lernfortschritt">Lernfortschritt ansehen</a>
+          </div>
         </section>
-      </section>
-    </main>
+
+        <section id="ansicht-ueben" class="ansicht" hidden>
+          <p class="frage-kennung" id="frage-kennung"></p>
+          <h2 class="frage-text" id="frage-text"></h2>
+
+          <form id="antwort-formular">
+            <ul class="optionen" id="optionen"></ul>
+            <p class="hinweis">Mehrfachauswahl möglich.</p>
+            <button class="schaltflaeche schaltflaeche--haupt" type="submit" id="abgeben">
+              Antwort abgeben
+            </button>
+          </form>
+
+          <section id="rueckmeldung" class="rueckmeldung" hidden aria-live="polite">
+            <p class="rueckmeldung-urteil" id="rueckmeldung-urteil"></p>
+            <p class="rueckmeldung-erlaeuterung" id="rueckmeldung-erlaeuterung"></p>
+            <button class="schaltflaeche schaltflaeche--haupt" type="button" id="weiter">
+              Nächste Frage
+            </button>
+          </section>
+
+          <p class="meldung" id="keine-frage" hidden>Der Katalog enthält keine Frage zum Üben.</p>
+        </section>
+
+        <section id="ansicht-lernfortschritt" class="ansicht" hidden>
+          <h2>Lernfortschritt</h2>
+          <p class="lernfortschritt-erlaeuterung" id="lernfortschritt-gesamt"></p>
+
+          <h3>Nach Wissensstufe</h3>
+          <ul class="aufschluesselung" id="lernfortschritt-wissensstufen"></ul>
+
+          <h3>Nach Lektion</h3>
+          <ul class="aufschluesselung" id="lernfortschritt-lektionen"></ul>
+
+          <h3>Problemfragen</h3>
+          <p id="problemfragen-leer" hidden>Zurzeit gibt es keine Problemfragen.</p>
+          <ul class="problemfragen" id="problemfragen"></ul>
+
+          <div class="schaltflaechen">
+            <button class="schaltflaeche schaltflaeche--gefahr" type="button" id="zuruecksetzen">
+              Lernfortschritt zurücksetzen
+            </button>
+          </div>
+        </section>
+      </main>
+
+      <footer class="fuss">
+        <p class="herkunft" id="herkunft"></p>
+      </footer>
+    </div>
 
     <script type="module" src="js/app.js"></script>
   </body>
