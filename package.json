@@ -1,9 +1,9 @@
 {
-  "name": "handball-schiedsrichter-fragenkatalog",
+  "name": "schiri-trainer",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Fragenkatalog und Lern-Webanwendung für die DHB-Schiedsrichter-Grundausbildung",
+  "description": "Übungs- und Prüfungstrainer für den DHB-Regelfragenkatalog",
   "license": "UNLICENSED",
   "scripts": {
     "validiere": "node skripte/validiere-katalog.mjs",
