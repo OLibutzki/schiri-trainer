@@ -6,15 +6,16 @@ const KATALOG_URL = new URL('../data/fragen.json', import.meta.url);
 
 /**
  * Laedt die Katalogdatei.
- * @param {typeof fetch} [holen] Einspringpunkt fuer Tests.
  * @returns {Promise<Katalog>}
  */
-export async function ladeKatalog(holen = fetch) {
-  const antwort = await holen(KATALOG_URL);
-  if (!antwort.ok) {
-    throw new Error(`Katalog nicht ladbar (HTTP ${antwort.status})`);
+export async function ladeKatalog() {
+  // Nicht `antwort` benannt: Im Glossar ist die Antwort die vom Anwender
+  // gewaehlte Menge von Optionen (CONTEXT.md).
+  const httpAntwort = await fetch(KATALOG_URL);
+  if (!httpAntwort.ok) {
+    throw new Error(`Katalog nicht ladbar (HTTP ${httpAntwort.status})`);
   }
-  return /** @type {Katalog} */ (await antwort.json());
+  return /** @type {Katalog} */ (await httpAntwort.json());
 }
 
 /**

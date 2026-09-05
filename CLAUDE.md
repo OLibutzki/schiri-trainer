@@ -51,13 +51,19 @@ lässt mehrere zu, auch wenn der heutige Bestand keinen Gebrauch davon macht.
 
 `npm run pruefe` führt Katalogvalidierung, Tests und Typprüfung zusammen.
 TypeScript ist die einzige devDependency und dient ausschließlich der Prüfung
-der JSDoc-Typen, nie dem Bauen (ADR-0003). Bei jeder Änderung an der Hauptlinie
-läuft dieselbe Strecke in GitHub Actions; nur bei fehlerfreiem Durchlauf wird
-`app/` nach GitHub Pages veröffentlicht.
+der JSDoc-Typen, nie dem Bauen (ADR-0003). Geprüft werden die Anwendungsmodule
+unter `app/js/`; Tests und Skripte bleiben außen vor, weil ihre Node-Importe mit
+`@types/node` eine zweite devDependency verlangt hätten. Bei jeder Änderung an
+der Hauptlinie läuft dieselbe Strecke in GitHub Actions; nur bei fehlerfreiem
+Durchlauf wird `app/` nach GitHub Pages veröffentlicht.
 
-Nicht automatisiert geprüft und deshalb manuell im Browser (Mobil- und
-Desktop-Breite) abzunehmen: Oberfläche, Hash-Routing, Service Worker und
-Tastenkürzel.
+Die Oberfläche wird nicht automatisiert geprüft, sondern manuell im Browser in
+Mobil- und Desktop-Breite abgenommen. Dasselbe gilt für Hash-Routing, Service
+Worker und Tastenkürzel, sobald es sie gibt.
+
+**Einmaliger Schritt des Repository-Inhabers:** Die Pages-Quelle muss in den
+Repository-Einstellungen auf „GitHub Actions" stehen. Ohne ihn schlägt der
+Veröffentlichungsschritt fehl; ein Agent kann ihn nicht ausführen.
 
 ## Verhältnis zum Quell-PDF
 

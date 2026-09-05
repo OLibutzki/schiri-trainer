@@ -9,10 +9,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
 jobs:
   pruefen:
     name: Prüfstrecke
@@ -37,6 +33,11 @@ jobs:
     needs: pruefen
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    # Nur die Veroeffentlichung wird serialisiert; Pruefstrecken von Pull Requests
+    # sollen sich nicht hinter einem laufenden Deployment anstellen muessen.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

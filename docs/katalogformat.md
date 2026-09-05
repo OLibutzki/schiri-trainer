@@ -87,6 +87,13 @@ Was die Validierung erzwingt — und worauf sich die Anwendung deshalb verlassen
 Der Bestand wurde einmalig aus dem zuvor gepflegten Markdown-Katalog konvertiert und
 dabei maschinell dagegen abgeglichen (68 Fragen, 235 Optionen, 68 korrekte Optionen,
 deckungsgleiche Texte). Das Markdown ist danach entfallen und bleibt über Commit
-`68bd394` wiederherstellbar. Die Quell-PDFs unter `fragenkatalog/quellmaterial/` bleiben
+`68bd394` wiederherstellbar. Der Abgleich ist wiederholbar, damit der Beleg nicht
+allein auf einer Commit-Nachricht ruht:
+
+```sh
+git worktree add ../altbestand 68bd394
+node skripte/einmalig/abgleich-markdown.mjs ../altbestand/fragenkatalog/markdown
+git worktree remove ../altbestand
+``` Die Quell-PDFs unter `fragenkatalog/quellmaterial/` bleiben
 als Herkunftsbeleg erhalten; sie sind passwortgeschützt und nur über
 `pdftotext -layout -enc UTF-8` lesbar.

@@ -34,14 +34,21 @@ let katalog;
 let aktuelleFrage = null;
 
 /**
- * Waehlt eine zufaellige Frage; die unmittelbar zuvor gestellte wird
- * uebersprungen, solange es eine Alternative gibt.
+ * Waehlt eine zufaellige Frage. Gleichverteilt und ohne Gedaechtnis: Das Gewicht
+ * aus dem Lernfortschritt kommt mit der Lern-Engine (ADR-0002).
  * @returns {Frage}
  */
 function naechsteFrage() {
-  const kandidaten = katalog.fragen.filter((frage) => frage !== aktuelleFrage);
-  const menge = kandidaten.length > 0 ? kandidaten : katalog.fragen;
-  return menge[Math.floor(Math.random() * menge.length)];
+  return katalog.fragen[Math.floor(Math.random() * katalog.fragen.length)];
+}
+
+/** @returns {HTMLInputElement[]} Die Kaestchen der angezeigten Optionen. */
+function kaestchen() {
+  return [
+    .../** @type {NodeListOf<HTMLInputElement>} */ (
+      anzeige.optionen.querySelectorAll('input[type="checkbox"]')
+    ),
+  ];
 }
 
 /** @param {Frage} frage */
@@ -87,10 +94,9 @@ function zeigeFrage(frage) {
 
 /** @returns {string[]} */
 function gewaehlteBuchstaben() {
-  const kaestchen = /** @type {NodeListOf<HTMLInputElement>} */ (
-    anzeige.optionen.querySelectorAll('input[type="checkbox"]')
-  );
-  return [...kaestchen].filter((k) => k.checked).map((k) => k.value);
+  return kaestchen()
+    .filter((feld) => feld.checked)
+    .map((feld) => feld.value);
 }
 
 function werteAus() {
@@ -100,13 +106,10 @@ function werteAus() {
   const gewaehltMenge = new Set(gewaehlt);
   const korrektMenge = new Set(bewertung.korrekt);
 
-  const kaestchen = /** @type {NodeListOf<HTMLInputElement>} */ (
-    anzeige.optionen.querySelectorAll('input[type="checkbox"]')
-  );
-  for (const kaestchenEintrag of kaestchen) {
-    kaestchenEintrag.disabled = true;
-    const feld = /** @type {HTMLElement} */ (kaestchenEintrag.closest('.option'));
-    const buchstabe = kaestchenEintrag.value;
+  for (const optionskaestchen of kaestchen()) {
+    optionskaestchen.disabled = true;
+    const feld = /** @type {HTMLElement} */ (optionskaestchen.closest('.option'));
+    const buchstabe = optionskaestchen.value;
     const vermerk = document.createElement('span');
     vermerk.className = 'option-vermerk';
 

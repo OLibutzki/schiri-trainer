@@ -1,11 +1,18 @@
-/** @import { Katalog } from './typen.js' */
-
 /**
  * Die einzige Formatversion, die diese Anwendung lesen kann. Eine Aenderung am
  * Aufbau der Katalogdatei erhoeht sie, damit ein alter Bestand erkannt und nicht
  * still fehlinterpretiert wird.
  */
 export const FORMATVERSION = 1;
+
+/**
+ * Was der Metadatenblock an bekannten Kennungen hergibt: die Wissensstufen und
+ * die Zuordnung Lektion → Wissensstufe. Gegen dieses Verzeichnis werden die
+ * Verweise der Fragen geprueft.
+ * @typedef {object} Metadatenverzeichnis
+ * @property {Set<string>} wissensstufen
+ * @property {Map<string, string>} lektionen
+ */
 
 /**
  * @typedef {object} Verstoss
@@ -73,10 +80,10 @@ export function pruefeKatalog(daten) {
 /**
  * @param {unknown} rohdaten
  * @param {(code: string, fundstelle: string, meldung: string) => void} melde
- * @returns {{ wissensstufen: Set<string>, lektionen: Map<string, string> }} Bekannte
- *   Wissensstufen und die Zuordnung Lektion → Wissensstufe.
+ * @returns {Metadatenverzeichnis}
  */
 function pruefeMetadaten(rohdaten, melde) {
+  /** @type {Set<string>} */
   const wissensstufen = new Set();
   /** @type {Map<string, string>} */
   const lektionen = new Map();
@@ -89,7 +96,7 @@ function pruefeMetadaten(rohdaten, melde) {
 
   for (const feld of ['titel', 'herkunft', 'regelstand', 'regelnGueltigAb']) {
     if (!istText(metadaten[feld])) {
-      melde('fehlende-metadaten', 'metadaten', `Das Metadatenfeld „${feld}" fehlt oder ist leer.`);
+      melde('fehlende-metadaten', 'metadaten', `Das Metadatenfeld „${feld}“ fehlt oder ist leer.`);
     }
   }
 
@@ -106,7 +113,7 @@ function pruefeMetadaten(rohdaten, melde) {
         continue;
       }
       if (wissensstufen.has(stufe.id)) {
-        melde('doppelte-kennung', 'metadaten', `Die Wissensstufe „${stufe.id}" kommt mehrfach vor.`);
+        melde('doppelte-kennung', 'metadaten', `Die Wissensstufe „${stufe.id}“ kommt mehrfach vor.`);
       }
       wissensstufen.add(stufe.id);
     }
@@ -125,13 +132,13 @@ function pruefeMetadaten(rohdaten, melde) {
         continue;
       }
       if (lektionen.has(lektion.id)) {
-        melde('doppelte-kennung', 'metadaten', `Die Lektion „${lektion.id}" kommt mehrfach vor.`);
+        melde('doppelte-kennung', 'metadaten', `Die Lektion „${lektion.id}“ kommt mehrfach vor.`);
       }
       if (!wissensstufen.has(lektion.wissensstufe)) {
         melde(
           'unbekannte-wissensstufe',
           `metadaten/${lektion.id}`,
-          `Die Lektion „${lektion.id}" verweist auf die unbekannte Wissensstufe ` +
+          `Die Lektion „${lektion.id}“ verweist auf die unbekannte Wissensstufe ` +
             `${JSON.stringify(lektion.wissensstufe)}.`,
         );
       }
@@ -146,7 +153,7 @@ function pruefeMetadaten(rohdaten, melde) {
  * @param {unknown} rohdaten
  * @param {number} index
  * @param {Set<string>} gesehene
- * @param {{ wissensstufen: Set<string>, lektionen: Map<string, string> }} metadaten
+ * @param {Metadatenverzeichnis} metadaten
  * @param {(code: string, fundstelle: string, meldung: string) => void} melde
  */
 function pruefeFrage(rohdaten, index, gesehene, metadaten, melde) {
@@ -160,7 +167,7 @@ function pruefeFrage(rohdaten, index, gesehene, metadaten, melde) {
   if (!istText(frage.id)) {
     melde('fehlende-kennung', fundstelle, 'Die Frage hat keine Kennung.');
   } else if (gesehene.has(frage.id)) {
-    melde('doppelte-kennung', fundstelle, `Die Fragenkennung „${frage.id}" kommt mehrfach vor.`);
+    melde('doppelte-kennung', fundstelle, `Die Fragenkennung „${frage.id}“ kommt mehrfach vor.`);
   } else {
     gesehene.add(frage.id);
   }
@@ -189,7 +196,7 @@ function pruefeFrage(rohdaten, index, gesehene, metadaten, melde) {
     melde(
       'lektion-fremder-wissensstufe',
       fundstelle,
-      `Die Lektion „${frage.lektion}" gehört zu einer anderen Wissensstufe als die Frage.`,
+      `Die Lektion „${frage.lektion}“ gehört zu einer anderen Wissensstufe als die Frage.`,
     );
   }
 
@@ -225,7 +232,7 @@ function pruefeFrage(rohdaten, index, gesehene, metadaten, melde) {
         'luecke-in-buchstabenfolge',
         fundstelle,
         `Option ${optionsindex + 1} trägt den Buchstaben ${JSON.stringify(option.buchstabe)} ` +
-          `statt „${BUCHSTABEN[optionsindex]}"; die Folge läuft lückenlos ab „a".`,
+          `statt „${BUCHSTABEN[optionsindex]}“; die Folge läuft lückenlos ab „a“.`,
       );
     }
   });
