@@ -44,13 +44,30 @@ const UNBERUEHRT = Object.freeze({ folge: 0, falsch: 0, zuletzt: null });
 
 /**
  * Eine Eingrenzung reduziert die Kandidatenmenge eines Uebungslaufs, bevor
- * gewichtet wird. `null` bedeutet: kein Ausschluss, der gesamte Katalog gilt.
- * @typedef {
- *   | { typ: 'wissensstufe', id: string }
- *   | { typ: 'lektion', ids: string[] }
- *   | { typ: 'problemfragen' }
- * } Eingrenzung
+ * gewichtet wird. Die drei Kriterien sind unabhaengig voneinander kombinierbar
+ * und wirken als Schnittmenge; eine leere Teilmenge bzw. `false` bedeutet:
+ * keine Einschraenkung in dieser Dimension. Ohne jedes Kriterium gilt der
+ * gesamte Katalog (siehe `istEingegrenzt`).
+ * @typedef {object} Eingrenzung
+ * @property {readonly string[]} wissensstufen Teilmenge von Wissensstufen-Ids.
+ * @property {readonly string[]} lektionen Teilmenge von Lektionen-Ids.
+ * @property {boolean} nurProblemfragen Schraenkt zusaetzlich auf Problemfragen ein.
  */
+
+/** Eingrenzung ohne jede Einschraenkung: der gesamte Katalog gilt. */
+export const LEERE_EINGRENZUNG = Object.freeze({
+  wissensstufen: Object.freeze([]),
+  lektionen: Object.freeze([]),
+  nurProblemfragen: false,
+});
+
+/**
+ * @param {Eingrenzung} eingrenzung
+ * @returns {boolean} Ob mindestens ein Kriterium der Eingrenzung wirkt.
+ */
+export function istEingegrenzt(eingrenzung) {
+  return eingrenzung.wissensstufen.length > 0 || eingrenzung.lektionen.length > 0 || eingrenzung.nurProblemfragen;
+}
 
 /**
  * @param {number} gemeistert
@@ -77,8 +94,8 @@ export function erzeugeLernEngine({ katalog, speicher, uhr = Date.now, zufall = 
   let eintraege = gelesen.eintraege;
   /** @type {string | null} */
   let zuletztGestellt = null;
-  /** @type {Eingrenzung | null} */
-  let eingrenzungAktuell = null;
+  /** @type {Eingrenzung} */
+  let eingrenzungAktuell = LEERE_EINGRENZUNG;
 
   /**
    * @param {string} frageId
@@ -130,17 +147,18 @@ export function erzeugeLernEngine({ katalog, speicher, uhr = Date.now, zufall = 
    * @returns {Frage[]}
    */
   function eingrenzungsBasis() {
-    if (eingrenzungAktuell === null) return katalog.fragen;
-    switch (eingrenzungAktuell.typ) {
-      case 'wissensstufe':
-        return katalog.fragen.filter((frage) => frage.wissensstufe === eingrenzungAktuell.id);
-      case 'lektion':
-        return katalog.fragen.filter((frage) => eingrenzungAktuell.ids.includes(frage.lektion));
-      case 'problemfragen':
-        return problemfragenBerechnen();
-      default:
-        return katalog.fragen;
+    let basis = katalog.fragen;
+    if (eingrenzungAktuell.wissensstufen.length > 0) {
+      basis = basis.filter((frage) => eingrenzungAktuell.wissensstufen.includes(frage.wissensstufe));
     }
+    if (eingrenzungAktuell.lektionen.length > 0) {
+      basis = basis.filter((frage) => eingrenzungAktuell.lektionen.includes(frage.lektion));
+    }
+    if (eingrenzungAktuell.nurProblemfragen) {
+      const problemIds = new Set(problemfragenBerechnen().map((frage) => frage.id));
+      basis = basis.filter((frage) => problemIds.has(frage.id));
+    }
+    return basis;
   }
 
   /**
@@ -234,17 +252,17 @@ export function erzeugeLernEngine({ katalog, speicher, uhr = Date.now, zufall = 
     problemfragen: problemfragenBerechnen,
 
     /**
-     * Setzt oder hebt die Eingrenzung eines Uebungslaufs auf. Der Wechsel
-     * loest die Sperre der zuletzt gestellten Frage, da sie sich auf eine
-     * andere Kandidatenmenge bezog.
-     * @param {Eingrenzung | null} neu
+     * Setzt die Eingrenzung eines Uebungslaufs neu (`LEERE_EINGRENZUNG`, um sie
+     * aufzuheben). Der Wechsel loest die Sperre der zuletzt gestellten Frage,
+     * da sie sich auf eine andere Kandidatenmenge bezog.
+     * @param {Eingrenzung} neu
      */
     setzeEingrenzung: (neu) => {
       eingrenzungAktuell = neu;
       zuletztGestellt = null;
     },
 
-    /** @returns {Eingrenzung | null} */
+    /** @returns {Eingrenzung} */
     eingrenzung: () => eingrenzungAktuell,
 
     /** Verwirft den gesamten Lernfortschritt, auch im Speicher. */

@@ -73,6 +73,12 @@ Ununterbrochenes Üben einzelner Fragen mit sofortiger Rückmeldung. Die
 Fragenauswahl folgt dem Gewicht, und jede Antwort verändert den Lernfortschritt.
 _Vermeide_: Lernmodus, Training
 
+**Eingrenzung**:
+Die Einschränkung der im Übungsmodus infrage kommenden Fragen auf ausgewählte
+Wissensstufen und/oder Lektionen, wahlweise zusätzlich auf Problemfragen
+beschränkt. Die Bestandteile sind kombinierbar; ohne jede Auswahl ist die
+Kandidatenmenge der gesamte Katalog.
+
 **Prüfungsmodus**:
 Ein Durchgang mit vorab gewählter Fragenzahl, der die Prüfungssituation nachstellt:
 Rückmeldung erst am Ende, Fragen breit über die Lektionen verteilt statt nach
