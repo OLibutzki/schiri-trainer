@@ -74,13 +74,27 @@ Fragenauswahl folgt dem Gewicht, und jede Antwort verändert den Lernfortschritt
 _Vermeide_: Lernmodus, Training
 
 **Eingrenzung**:
-Die Einschränkung der im Übungsmodus infrage kommenden Fragen auf ausgewählte
-Wissensstufen und/oder Lektionen, wahlweise zusätzlich auf Problemfragen
-beschränkt. Die Bestandteile sind kombinierbar; ohne jede Auswahl ist die
-Kandidatenmenge der gesamte Katalog.
+Die Einschränkung der infrage kommenden Fragen auf ausgewählte Wissensstufen
+und/oder Lektionen, wahlweise zusätzlich auf Problemfragen beschränkt. Sie gilt
+in beiden Modi; welche Achsen ein Modus anbietet, darf sich unterscheiden. Die
+Bestandteile sind kombinierbar; ohne jede Auswahl ist die Kandidatenmenge der
+gesamte Katalog. Wie viele Fragen daraus tatsächlich gestellt werden, ist nicht
+Teil der Eingrenzung, sondern der Umfang.
+_Vermeide_: Filter, Auswahl (mehrdeutig)
+
+**Kandidatenmenge**:
+Die Fragen, die nach Anwendung der Eingrenzung übrig bleiben und damit gestellt
+werden können. Ist sie leer, gibt es nichts zu üben und nichts zu prüfen.
+_Vermeide_: Fragenmenge, Auswahl
+
+**Umfang**:
+Die Zahl der Fragen, die eine Prüfung aus der Kandidatenmenge stellt. Vorab
+gewählt und für den ganzen Durchgang bindend. Der Übungsmodus kennt keinen
+Umfang: Er läuft, bis der Anwender aufhört.
+_Vermeide_: Länge, Dauer
 
 **Prüfungsmodus**:
-Ein Durchgang mit vorab gewählter Fragenzahl, der die Prüfungssituation nachstellt:
+Ein Durchgang mit vorab gewähltem Umfang, der die Prüfungssituation nachstellt:
 Rückmeldung erst am Ende, Fragen breit über die Lektionen verteilt statt nach
 Gewicht, und ohne jede Wirkung auf den Lernfortschritt.
 _Vermeide_: Test, Simulation, Klausur
