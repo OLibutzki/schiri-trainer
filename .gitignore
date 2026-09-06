@@ -1,1 +1,4 @@
 node_modules/
+
+# Ausgabe von `npm run ui-bilder`; Werkzeug fuer Durchsichten, kein Artefakt.
+.ui-bilder/

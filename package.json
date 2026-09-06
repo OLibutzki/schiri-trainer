@@ -9,9 +9,12 @@
     "validiere": "node skripte/validiere-katalog.mjs",
     "test": "node --test tests/*.test.mjs",
     "typen": "tsc --noEmit",
-    "pruefe": "npm run validiere && npm run test && npm run typen"
+    "pruefe": "npm run validiere && npm run test && npm run typen",
+    "pruefe-ui": "node --test tests/ui/*.test.mjs",
+    "ui-bilder": "node skripte/ui-bilder.mjs"
   },
   "devDependencies": {
+    "playwright": "^1.63.0",
     "typescript": "^5.9.3"
   }
 }

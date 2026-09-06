@@ -13,5 +13,8 @@ allem eine weitere Fehlerquelle zwischen Quelltext und Deploy eingezogen.
 - Ohne Compiler gibt es keine Typprüfung. Ersatzweise werden Typen als
   JSDoc-Kommentare notiert und in CI mit `tsc --noEmit` geprüft; TypeScript ist
   dadurch die einzige devDependency und wird nie zum Bauen verwendet.
+  **Abgelöst durch ADR-0005:** Playwright ist als zweite devDependency
+  hinzugekommen. Der Kern dieser Entscheidung — kein Build-Schritt zwischen
+  Quelltext und Deploy — bleibt davon unberührt.
 - Alle Pfade sind relativ, damit die Anwendung sowohl lokal als auch unter dem
   Projektpfad von GitHub Pages ohne Konfiguration läuft.

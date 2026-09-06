@@ -27,10 +27,28 @@ jobs:
       - name: Typen prüfen
         run: npm run typen
 
+  ui:
+    name: UI-Prüfstrecke
+    # Getrennt von der übrigen Prüfstrecke, weil nur dieser Job einen Browser
+    # herunterlädt (ADR-0005). Beide laufen parallel; die Veröffentlichung
+    # wartet auf beide.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Browser bereitstellen
+        run: npx playwright install --with-deps chromium
+      - name: Oberfläche prüfen
+        run: npm run pruefe-ui
+
   veroeffentlichen:
     name: Nach GitHub Pages veröffentlichen
     # Nur bei fehlerfreier Prüfstrecke und nur auf der Hauptlinie.
-    needs: pruefen
+    needs: [pruefen, ui]
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     # Nur die Veroeffentlichung wird serialisiert; Pruefstrecken von Pull Requests

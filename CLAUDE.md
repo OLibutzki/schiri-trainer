@@ -22,8 +22,8 @@ app/                 Die ausgelieferte Anwendung; genau dieses Verzeichnis geht 
   index.html, styles.css
   data/fragen.json   Der Katalog
   js/                Native ES-Module ohne Bundler (ADR-0003)
-skripte/             Ausführbare Hüllen um Anwendungsmodule (Katalogvalidierung)
-tests/               node:test, ohne weitere Werkzeugkette
+skripte/             Ausführbare Hüllen um Anwendungsmodule (Katalogvalidierung, UI-Bilder)
+tests/               node:test; unter tests/ui/ zusätzlich Browser-Tests (ADR-0005)
 docs/                katalogformat.md, adr/, agents/
 fragenkatalog/
   quellmaterial/     Theoriefragen_Basiswissen.pdf, Lösungen Prüfungsfragen Basiswissen.pdf
@@ -52,16 +52,28 @@ lässt mehrere zu, auch wenn der heutige Bestand keinen Gebrauch davon macht.
 ## Prüfstrecke
 
 `npm run pruefe` führt Katalogvalidierung, Tests und Typprüfung zusammen.
-TypeScript ist die einzige devDependency und dient ausschließlich der Prüfung
-der JSDoc-Typen, nie dem Bauen (ADR-0003). Geprüft werden die Anwendungsmodule
-unter `app/js/`; Tests und Skripte bleiben außen vor, weil ihre Node-Importe mit
-`@types/node` eine zweite devDependency verlangt hätten. Bei jeder Änderung an
-der Hauptlinie läuft dieselbe Strecke in GitHub Actions; nur bei fehlerfreiem
-Durchlauf wird `app/` nach GitHub Pages veröffentlicht.
+TypeScript dient ausschließlich der Prüfung der JSDoc-Typen, nie dem Bauen
+(ADR-0003). Geprüft werden die Anwendungsmodule unter `app/js/`; Tests und
+Skripte bleiben außen vor, weil ihre Node-Importe mit `@types/node` eine
+weitere devDependency verlangt hätten.
 
-Die Oberfläche wird nicht automatisiert geprüft, sondern manuell im Browser in
-Mobil- und Desktop-Breite abgenommen. Dasselbe gilt für Hash-Routing, Service
-Worker und Tastenkürzel, sobald es sie gibt.
+`npm run pruefe-ui` prüft die Oberfläche im Browser (`tests/ui/`, Playwright
+als Bibliothek unter `node --test`, ADR-0005). Es ist bewusst **nicht** Teil
+von `npm run pruefe`: Die schnelle Schleife bleibt browserfrei. Ein
+Abnahmekriterium eines noch offenen Issues steht dort als Test mit
+`{ todo: 'Issue #n' }` — er läuft mit, schlägt fehl, zählt nicht als Fehler und
+wird grün, sobald die Behebung greift.
+
+devDependencies sind damit TypeScript und Playwright; beide laufen nur in der
+Prüfstrecke und fassen das Auslieferungsartefakt `app/` nicht an.
+
+Bei jeder Änderung an der Hauptlinie laufen beide Strecken in GitHub Actions
+als getrennte Jobs; nur wenn beide fehlerfrei durchlaufen, wird `app/` nach
+GitHub Pages veröffentlicht.
+
+Nicht automatisiert bleibt der Service Worker; er wird weiterhin manuell im
+Browser abgenommen. `npm run ui-bilder` legt für Durchsichten Bildschirmfotos
+und Elementmaße in `.ui-bilder/` ab.
 
 **Einmaliger Schritt des Repository-Inhabers:** Die Pages-Quelle muss in den
 Repository-Einstellungen auf „GitHub Actions" stehen. Ohne ihn schlägt der
