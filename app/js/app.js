@@ -4,7 +4,7 @@
 /** @import { Katalog } from './typen.js' */
 /** @import { LernfortschrittTeil, Eingrenzung } from './lernengine.js' */
 /** @import { Pruefungsstand } from './pruefung.js' */
-import { ladeKatalog, bezeichneFrage, findeLektion, findeWissensstufe } from './katalog.js';
+import { ladeKatalog, bezeichneFrage, findeWissensstufe } from './katalog.js';
 import { mische } from './mischen.js';
 import { erzeugeLernEngine, istEingegrenzt } from './lernengine.js';
 import { baueStufenMitLektionen, stufenZustand, verdichteAuswahl, alleLektionIds } from './eingrenzungsbaum.js';
@@ -66,7 +66,6 @@ const anzeige = {
   eingrenzungAuswahl: /** @type {HTMLDetailsElement} */ (element('eingrenzung-auswahl')),
   eingrenzungBaum: element('eingrenzung-baum'),
   eingrenzungProblemfragen: /** @type {HTMLInputElement} */ (element('eingrenzung-problemfragen')),
-  eingrenzungUebernehmen: /** @type {HTMLButtonElement} */ (element('eingrenzung-uebernehmen')),
 
   pruefungEinrichtung: element('pruefung-einrichtung'),
   pruefungFragenzahl: /** @type {HTMLSelectElement} */ (element('pruefung-fragenzahl')),
@@ -212,7 +211,7 @@ function zeigeNaechsteFrage() {
     anzeige.frageKennung.textContent = '';
     anzeige.frageText.textContent = '';
     anzeige.keineFrage.textContent = istEingegrenzt(engine.eingrenzung())
-      ? 'Für diese Eingrenzung gibt es keine Frage. Auswahl oben anpassen und erneut übernehmen.'
+      ? 'Für diese Eingrenzung gibt es keine Frage. Auswahl oben anpassen, um weiterzuüben.'
       : 'Der Katalog enthält keine Frage zum Üben.';
     anzeige.keineFrage.hidden = false;
     return;
@@ -232,11 +231,11 @@ function beschreibeEingrenzung(eingrenzung) {
     teile.push(namen.join(', '));
   }
   if (eingrenzung.lektionen.length > 0) {
-    const titel = eingrenzung.lektionen.map((id) => {
-      const lektion = findeLektion(katalog, id);
-      return lektion ? `Lektion ${lektion.nummer}: ${lektion.titel}` : id;
-    });
-    teile.push(titel.join(', '));
+    // Nur die Anzahl statt jeden Titel: Bei vielen angehakten Lektionen
+    // (typisch, da der Baum mit allen angehakten Kaestchen startet) waere
+    // eine Aufzaehlung aller Titel zu lang fuer die Summary-Zeile.
+    const anzahl = eingrenzung.lektionen.length;
+    teile.push(`${anzahl} ${anzahl === 1 ? 'Lektion' : 'Lektionen'}`);
   }
   let text = teile.length > 0 ? teile.join(' · ') : 'Alle Lektionen';
   if (eingrenzung.nurProblemfragen) text += ' + Nur Problemfragen';
@@ -249,9 +248,10 @@ function zeichneEingrenzung() {
 }
 
 /**
- * Die im Baum angehakten Lektionen-Ids, solange der Anwender die Auswahl noch
- * nicht mit "Übernehmen" bestaetigt hat. Getrennt vom Eingrenzungszustand der
- * Engine, damit ein Ansichtswechsel eine begonnene Auswahl nicht verwirft.
+ * Die im Baum angehakten Lektionen-Ids. Jede Aenderung wirkt sofort auf die
+ * Eingrenzung der Engine (siehe `wendeEingrenzungAn`); dieser Zustand haelt
+ * nur fest, welche Kaestchen beim naechsten Zeichnen des Baums angehakt sein
+ * sollen.
  * @type {Set<string>}
  */
 let baumAuswahl = new Set();
@@ -366,15 +366,18 @@ function baueWissensstufenOptionen() {
     });
 }
 
-/** Uebernimmt die im Baum angehakte Auswahl plus Problemfragen-Kaestchen und startet neu. */
-function uebernehmeEingrenzung() {
+/**
+ * Wendet die im Baum angehakte Auswahl plus Problemfragen-Kaestchen sofort an
+ * und startet neu. Es gibt keinen separaten "Übernehmen"-Button: Jede
+ * Aenderung an Baum oder Kaestchen wirkt unmittelbar.
+ */
+function wendeEingrenzungAn() {
   const { wissensstufen, lektionen } = verdichteAuswahl(katalog, baumAuswahl);
   engine.setzeEingrenzung({
     wissensstufen,
     lektionen,
     nurProblemfragen: anzeige.eingrenzungProblemfragen.checked,
   });
-  anzeige.eingrenzungAuswahl.open = false;
   zeichneEingrenzung();
   zeigeNaechsteFrage();
 }
@@ -752,8 +755,6 @@ anzeige.weiter.addEventListener('click', () => {
   window.scrollTo({ top: 0 });
 });
 
-anzeige.eingrenzungUebernehmen.addEventListener('click', uebernehmeEingrenzung);
-
 /**
  * Zeichnet den Baum neu und stellt anschliessend den Fokus auf das per
  * Selektor benannte Element wieder her. `renderEingrenzungsBaum` ersetzt den
@@ -786,8 +787,13 @@ anzeige.eingrenzungBaum.addEventListener('change', (ereignis) => {
     if (ziel.checked) baumAuswahl.add(ziel.value);
     else baumAuswahl.delete(ziel.value);
     renderEingrenzungsBaumMitFokus(`input[name="eingrenzung-lektion"][value="${CSS.escape(ziel.value)}"]`);
+  } else {
+    return;
   }
+  wendeEingrenzungAn();
 });
+
+anzeige.eingrenzungProblemfragen.addEventListener('change', wendeEingrenzungAn);
 
 anzeige.eingrenzungBaum.addEventListener('click', (ereignis) => {
   const ziel = ereignis.target;
