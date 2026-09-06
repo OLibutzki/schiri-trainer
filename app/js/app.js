@@ -79,6 +79,7 @@ const anzeige = {
   pruefungErgebnis: element('pruefung-ergebnis'),
   pruefungPunktzahl: element('pruefung-punktzahl'),
   pruefungAlleRichtig: element('pruefung-alle-richtig'),
+  pruefungFalscheTitel: element('pruefung-falsche-titel'),
   pruefungFalsche: element('pruefung-falsche'),
   pruefungNeu: /** @type {HTMLButtonElement} */ (element('pruefung-neu')),
 
@@ -368,6 +369,7 @@ function zeichnePruefung() {
   const auswertung = auswertePruefung(katalog, pruefungsstand);
   anzeige.pruefungPunktzahl.textContent = `${auswertung.punktzahl} von ${auswertung.gesamt} Fragen richtig beantwortet.`;
   anzeige.pruefungAlleRichtig.hidden = auswertung.falsche.length > 0;
+  anzeige.pruefungFalscheTitel.hidden = auswertung.falsche.length === 0;
   anzeige.pruefungFalsche.replaceChildren(
     ...auswertung.falsche.map(({ frage, gewaehlt, bewertung }) => {
       const zeile = document.createElement('li');
