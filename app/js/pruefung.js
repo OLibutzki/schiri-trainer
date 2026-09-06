@@ -7,6 +7,7 @@
 // speichern und wiederherstellen laesst (Issue #8).
 import { bewerteAntwort } from './antwort.js';
 import { mische } from './mischen.js';
+import { findeWissensstufe } from './katalog.js';
 
 /**
  * @typedef {object} Pruefungsstand
@@ -116,6 +117,23 @@ export function beantworte(stand, gewaehlteBuchstaben) {
   const antworten = [...stand.antworten];
   antworten[index] = [...gewaehlteBuchstaben];
   return { ...stand, antworten };
+}
+
+/**
+ * Beschreibt die Eingrenzung einer Pruefung (Wissensstufe) zusammen mit ihrem
+ * Umfang, z. B. „Basiswissen · 10 Fragen". `null`, solange die Pruefung auf
+ * keine Wissensstufe eingegrenzt wurde: Die laufende Pruefung soll ihre
+ * Eingrenzung nennen, aber keine ungefragte Zusatzzeile fuer eine Pruefung
+ * ueber den ganzen Katalog einbringen (Issue #34).
+ * @param {Katalog} katalog
+ * @param {Pruefungsstand} stand
+ * @returns {string | null}
+ */
+export function beschreibePruefungsEingrenzung(katalog, stand) {
+  if (stand.wissensstufe === null) return null;
+  const stufe = findeWissensstufe(katalog, stand.wissensstufe);
+  const name = stufe ? stufe.name : stand.wissensstufe;
+  return `${name} · ${stand.frageIds.length} Fragen`;
 }
 
 /**

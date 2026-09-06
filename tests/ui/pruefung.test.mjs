@@ -1,5 +1,4 @@
-// Pruefungsansicht im Browser. Wie in `uebung.test.mjs` halten die mit `todo`
-// markierten Tests die Abnahmekriterien offener Issues fest.
+// Pruefungsansicht im Browser.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { starteUmgebung, oeffne, masse, MOBIL, DESKTOP } from './umgebung.mjs';
@@ -73,6 +72,22 @@ test('wertet eine vollstaendig beantwortete Pruefung aus', async () => {
   assert.ok(await seite.isVisible('#pruefung-neu'), '„Neue Prüfung" fehlt');
 });
 
+test('zeigt im Kopfbalken den Pruefungsfortschritt statt des Lernfortschritts', async () => {
+  const seite = await oeffne(umgebung.browser, umgebung.adresse, { ansicht: '/pruefung' });
+
+  await starte(seite);
+  assert.equal((await seite.textContent('#kopf-anteil'))?.trim(), 'Frage 1 von 10');
+
+  await seite.locator('#pruefung-optionen .option').first().click();
+  await seite.click('#pruefung-abgeben');
+  await seite.waitForFunction(
+    () => document.getElementById('kopf-anteil')?.textContent?.trim() === 'Frage 2 von 10',
+  );
+
+  await beantworteAlles(seite);
+  assert.match((await seite.textContent('#kopf-anteil')) ?? '', /%$/, 'zeigt nach Abschluss nicht wieder den Lernfortschritt');
+});
+
 test('laesst den Lernfortschritt von einer Pruefung unberuehrt', async () => {
   const seite = await oeffne(umgebung.browser, umgebung.adresse, { ansicht: '/pruefung' });
   const vorher = await seite.textContent('#kopf-anteil');
@@ -81,6 +96,16 @@ test('laesst den Lernfortschritt von einer Pruefung unberuehrt', async () => {
   await beantworteAlles(seite);
 
   assert.equal(await seite.textContent('#kopf-anteil'), vorher, 'Lernfortschritt hat sich veraendert');
+});
+
+test('verschweigt die Eingrenzung nicht, zeigt aber keine ungefragte Zeile ohne Wissensstufen-Auswahl', async () => {
+  // Der ausgelieferte Katalog kennt nur eine Wissensstufe: Die Pruefung laeuft
+  // damit immer ohne Eingrenzung, und die Zusatzzeile bleibt entsprechend
+  // verborgen (siehe beschreibePruefungsEingrenzung fuer den Fall mit
+  // Eingrenzung, unit-getestet in tests/pruefung.test.mjs).
+  const seite = await oeffne(umgebung.browser, umgebung.adresse, { ansicht: '/pruefung' });
+  await starte(seite);
+  assert.ok(!(await seite.isVisible('#pruefung-eingrenzung')), 'Eingrenzungszeile erscheint ohne Eingrenzung');
 });
 
 test('gibt keine Pruefungsantwort ohne Auswahl ab', async () => {
