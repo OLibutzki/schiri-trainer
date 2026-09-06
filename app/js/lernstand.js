@@ -42,23 +42,25 @@ export function arbeitsspeicher(anfangswert = null) {
 }
 
 /**
- * Ein Speicher auf Basis von `localStorage`. Scheitert der Zugriff — etwa weil
- * der Browser Webspeicher blockiert —, wird auf den Arbeitsspeicher
- * ausgewichen: Ueben bleibt moeglich, nur ueberdauert der Stand die Sitzung nicht.
+ * Ein Speicher auf Basis von `localStorage`, unter dem uebergebenen Schluessel.
+ * Scheitert der Zugriff — etwa weil der Browser Webspeicher blockiert —, wird
+ * auf den Arbeitsspeicher ausgewichen: Ueben bleibt moeglich, nur ueberdauert
+ * der Stand die Sitzung nicht.
+ * @param {string} [schluessel]
  * @returns {Speicher}
  */
-export function browserSpeicher() {
+export function browserSpeicher(schluessel = LERNSTAND_SCHLUESSEL) {
   try {
-    const probe = `${LERNSTAND_SCHLUESSEL}.probe`;
+    const probe = `${schluessel}.probe`;
     window.localStorage.setItem(probe, '1');
     window.localStorage.removeItem(probe);
   } catch (fehler) {
-    console.warn('Kein dauerhafter Speicher verfügbar; der Lernfortschritt gilt nur für diese Sitzung.', fehler);
+    console.warn('Kein dauerhafter Speicher verfügbar; der Stand gilt nur für diese Sitzung.', fehler);
     return arbeitsspeicher();
   }
   return {
-    lies: () => window.localStorage.getItem(LERNSTAND_SCHLUESSEL),
-    schreibe: (inhalt) => window.localStorage.setItem(LERNSTAND_SCHLUESSEL, inhalt),
+    lies: () => window.localStorage.getItem(schluessel),
+    schreibe: (inhalt) => window.localStorage.setItem(schluessel, inhalt),
   };
 }
 
