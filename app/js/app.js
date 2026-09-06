@@ -51,7 +51,6 @@ const anzeige = {
   abgeben: /** @type {HTMLButtonElement} */ (element('abgeben')),
   rueckmeldung: element('rueckmeldung'),
   urteil: element('rueckmeldung-urteil'),
-  erlaeuterung: element('rueckmeldung-erlaeuterung'),
   weiter: element('weiter'),
   keineFrage: element('keine-frage'),
 
@@ -121,8 +120,9 @@ function kaestchen() {
 
 /**
  * Baut die Optionenliste einer Frage. Die Reihenfolge wechselt bei jeder
- * Anzeige, damit sich der Anwender den Inhalt merkt und nicht die Position;
- * der Original-Buchstabe bleibt sichtbar.
+ * Anzeige, damit sich der Anwender den Inhalt merkt. Der Buchstabe ist nur
+ * intern die Kennung einer Option (Formatdetail, siehe docs/katalogformat.md)
+ * und wird nicht angezeigt.
  * @param {Frage} frage
  * @returns {HTMLLIElement[]}
  */
@@ -139,14 +139,10 @@ function baueOptionenListe(frage) {
     optionskaestchen.name = 'option';
     optionskaestchen.value = option.buchstabe;
 
-    const buchstabe = document.createElement('span');
-    buchstabe.className = 'option-buchstabe';
-    buchstabe.textContent = `${option.buchstabe})`;
-
     const text = document.createElement('span');
     text.textContent = option.text;
 
-    feld.append(optionskaestchen, buchstabe, text);
+    feld.append(optionskaestchen, text);
     eintrag.append(feld);
     return eintrag;
   });
@@ -352,14 +348,10 @@ function baueOptionenRueckblick(frage, gewaehlt, bewertung) {
       optionskaestchen.type = 'checkbox';
       optionskaestchen.value = option.buchstabe;
 
-      const buchstabe = document.createElement('span');
-      buchstabe.className = 'option-buchstabe';
-      buchstabe.textContent = `${option.buchstabe})`;
-
       const text = document.createElement('span');
       text.textContent = option.text;
 
-      feld.append(optionskaestchen, buchstabe, text);
+      feld.append(optionskaestchen, text);
       eintrag.append(feld);
       return eintrag;
     }),
@@ -378,26 +370,8 @@ function werteAus() {
   anzeige.abgeben.disabled = true;
   anzeige.urteil.textContent = bewertung.richtig ? 'Richtig' : 'Falsch';
   anzeige.rueckmeldung.classList.add(bewertung.richtig ? 'rueckmeldung--richtig' : 'rueckmeldung--falsch');
-  anzeige.erlaeuterung.textContent = erlaeutere(bewertung);
   anzeige.rueckmeldung.hidden = false;
   anzeige.weiter.focus();
-}
-
-/**
- * @param {Bewertung} bewertung
- * @returns {string}
- */
-function erlaeutere(bewertung) {
-  const alsListe = (/** @type {string[]} */ buchstaben) =>
-    buchstaben.map((buchstabe) => `${buchstabe})`).join(', ');
-  const teile = [`Korrekt ${bewertung.korrekt.length === 1 ? 'ist' : 'sind'}: ${alsListe(bewertung.korrekt)}.`];
-  if (bewertung.zuUnrecht.length > 0) {
-    teile.push(`Zu Unrecht angekreuzt: ${alsListe(bewertung.zuUnrecht)}.`);
-  }
-  if (bewertung.uebersehen.length > 0) {
-    teile.push(`Übersehen: ${alsListe(bewertung.uebersehen)}.`);
-  }
-  return teile.join(' ');
 }
 
 /**

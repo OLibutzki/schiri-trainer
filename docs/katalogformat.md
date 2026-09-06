@@ -79,8 +79,9 @@ Was die Validierung erzwingt — und worauf sich die Anwendung deshalb verlassen
   Oberfläche bietet deshalb ausnahmslos Mehrfachauswahl an; ein an die Frage angepasstes
   Bedienelement würde verraten, wie viele Optionen korrekt sind.
 - **Der Original-Buchstabe ist Inhalt, keine Position.** Die Optionen werden bei jeder
-  Anzeige gemischt; der Buchstabe bleibt sichtbar, damit eine Frage im Quellkatalog
-  wiederauffindbar ist.
+  Anzeige gemischt. Der Buchstabe bleibt intern die stabile Kennung einer Option und
+  macht eine Frage im Quellkatalog wiederauffindbar; angezeigt wird er nicht — die
+  Oberfläche markiert Antworten stattdessen an der jeweiligen Option selbst.
 
 ## Herkunft
 
