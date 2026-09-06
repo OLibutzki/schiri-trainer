@@ -4,9 +4,10 @@
 /** @import { Katalog } from './typen.js' */
 /** @import { LernfortschrittTeil, Eingrenzung } from './lernengine.js' */
 /** @import { Pruefungsstand } from './pruefung.js' */
-import { ladeKatalog, bezeichneFrage, findeLektion, findeWissensstufe } from './katalog.js';
+import { ladeKatalog, bezeichneFrage } from './katalog.js';
 import { mische } from './mischen.js';
-import { erzeugeLernEngine } from './lernengine.js';
+import { erzeugeLernEngine, istEingegrenzt } from './lernengine.js';
+import { baueStufenMitLektionen, stufenZustand, verdichteAuswahl, alleLektionIds } from './eingrenzungsbaum.js';
 import { browserSpeicher } from './lernstand.js';
 import { starteRouting } from './routing.js';
 import {
@@ -61,13 +62,11 @@ const anzeige = {
   weiter: element('weiter'),
   keineFrage: element('keine-frage'),
 
-  eingrenzungAktiv: element('eingrenzung-aktiv'),
-  eingrenzungBeschreibung: element('eingrenzung-beschreibung'),
-  eingrenzungAufheben: /** @type {HTMLButtonElement} */ (element('eingrenzung-aufheben')),
+  eingrenzungZusammenfassung: element('eingrenzung-zusammenfassung'),
   eingrenzungAuswahl: /** @type {HTMLDetailsElement} */ (element('eingrenzung-auswahl')),
-  eingrenzungWissensstufe: /** @type {HTMLSelectElement} */ (element('eingrenzung-wissensstufe')),
-  eingrenzungLektionen: element('eingrenzung-lektionen'),
-  eingrenzungUebernehmen: /** @type {HTMLButtonElement} */ (element('eingrenzung-uebernehmen')),
+  eingrenzungAlle: /** @type {HTMLInputElement} */ (element('eingrenzung-alle-lektionen')),
+  eingrenzungBaum: element('eingrenzung-baum'),
+  eingrenzungProblemfragen: /** @type {HTMLInputElement} */ (element('eingrenzung-problemfragen')),
 
   pruefungEinrichtung: element('pruefung-einrichtung'),
   pruefungFragenzahl: /** @type {HTMLSelectElement} */ (element('pruefung-fragenzahl')),
@@ -212,8 +211,8 @@ function zeigeNaechsteFrage() {
     anzeige.rueckmeldung.hidden = true;
     anzeige.frageKennung.textContent = '';
     anzeige.frageText.textContent = '';
-    anzeige.keineFrage.textContent = engine.eingrenzung()
-      ? 'Für diese Eingrenzung gibt es keine Frage. Eingrenzung oben aufheben, um weiterzuüben.'
+    anzeige.keineFrage.textContent = istEingegrenzt(engine.eingrenzung())
+      ? 'Für diese Eingrenzung gibt es keine Frage. Auswahl oben anpassen, um weiterzuüben.'
       : 'Der Katalog enthält keine Frage zum Üben.';
     anzeige.keineFrage.hidden = false;
     return;
@@ -222,35 +221,145 @@ function zeigeNaechsteFrage() {
 }
 
 /**
- * Beschreibt eine Eingrenzung fuer die Anzeige.
+ * Beschreibt eine Eingrenzung fuer die Anzeige in der Summary-Zeile.
  * @param {Eingrenzung} eingrenzung
  * @returns {string}
  */
 function beschreibeEingrenzung(eingrenzung) {
-  switch (eingrenzung.typ) {
-    case 'wissensstufe': {
-      const stufe = findeWissensstufe(katalog, eingrenzung.id);
-      return `Eingegrenzt auf Wissensstufe „${stufe ? stufe.name : eingrenzung.id}".`;
-    }
-    case 'lektion': {
-      const titel = eingrenzung.ids.map((/** @type {string} */ id) => {
-        const lektion = findeLektion(katalog, id);
-        return lektion ? `Lektion ${lektion.nummer}: ${lektion.titel}` : id;
-      });
-      return `Eingegrenzt auf ${titel.join(', ')}.`;
-    }
-    case 'problemfragen':
-      return 'Eingegrenzt auf Problemfragen.';
-    default:
-      return '';
+  let text;
+  if (eingrenzung.lektionen === null) {
+    text = 'Alle Lektionen';
+  } else if (eingrenzung.lektionen.length === 0) {
+    text = 'Keine Lektionen';
+  } else {
+    // Nur die Anzahl statt jeden Titel: Bei vielen angehakten Lektionen
+    // (typisch, da der Baum mit allen angehakten Kaestchen startet) waere
+    // eine Aufzaehlung aller Titel zu lang fuer die Summary-Zeile.
+    const anzahl = eingrenzung.lektionen.length;
+    text = `${anzahl} ${anzahl === 1 ? 'Lektion' : 'Lektionen'}`;
   }
+  if (eingrenzung.nurProblemfragen) text += ' + Nur Problemfragen';
+  return text;
 }
 
-/** Zeichnet die Anzeige der aktiven Eingrenzung (oder deren Fehlen). */
+/** Zeichnet die Summary-Zeile der Eingrenzung entsprechend dem aktiven Zustand. */
 function zeichneEingrenzung() {
-  const eingrenzung = engine.eingrenzung();
-  anzeige.eingrenzungAktiv.hidden = eingrenzung === null;
-  if (eingrenzung) anzeige.eingrenzungBeschreibung.textContent = beschreibeEingrenzung(eingrenzung);
+  anzeige.eingrenzungZusammenfassung.textContent = beschreibeEingrenzung(engine.eingrenzung());
+}
+
+/**
+ * Die im Baum angehakten Lektionen-Ids. Jede Aenderung wirkt sofort auf die
+ * Eingrenzung der Engine (siehe `wendeEingrenzungAn`); dieser Zustand haelt
+ * nur fest, welche Kaestchen beim naechsten Zeichnen des Baums angehakt sein
+ * sollen.
+ * @type {Set<string>}
+ */
+let baumAuswahl = new Set();
+
+/** Wissensstufen, deren Lektionenliste im Baum gerade aufgeklappt ist. */
+let offeneStufen = new Set();
+
+/**
+ * Baut die Lektionen-Checkboxliste einer einzelnen Stufe (oder, im flachen
+ * Fall bei nur einer Wissensstufe, des gesamten Katalogs).
+ * @param {{ id: string, titel: string }[]} lektionen
+ * @returns {HTMLUListElement}
+ */
+function baueLektionenListe(lektionen) {
+  const liste = document.createElement('ul');
+  liste.className = 'eingrenzung-lektionen';
+  liste.append(
+    ...lektionen.map((lektion) => {
+      const zeile = document.createElement('li');
+      const feld = document.createElement('label');
+      const kaestchen = document.createElement('input');
+      kaestchen.type = 'checkbox';
+      kaestchen.name = 'eingrenzung-lektion';
+      kaestchen.value = lektion.id;
+      kaestchen.checked = baumAuswahl.has(lektion.id);
+      const text = document.createElement('span');
+      text.textContent = lektion.titel;
+      feld.append(kaestchen, text);
+      zeile.append(feld);
+      return zeile;
+    }),
+  );
+  return liste;
+}
+
+/**
+ * Baut die Kopfzeile plus aufklappbare Lektionenliste einer Stufe, fuer den
+ * Fall, dass der Katalog mehr als eine Wissensstufe enthaelt.
+ * @param {import('./eingrenzungsbaum.js').StufeMitLektionen} stufe
+ * @returns {HTMLDivElement}
+ */
+function baueStufeZeile(stufe) {
+  const container = document.createElement('div');
+  container.className = 'eingrenzung-stufe';
+
+  const kopf = document.createElement('div');
+  kopf.className = 'eingrenzung-stufe-kopf';
+
+  const label = document.createElement('label');
+  const kopfKaestchen = document.createElement('input');
+  kopfKaestchen.type = 'checkbox';
+  kopfKaestchen.className = 'eingrenzung-stufe-kaestchen';
+  kopfKaestchen.dataset.wissensstufe = stufe.id;
+  const zustand = stufenZustand(stufe.lektionen, baumAuswahl);
+  kopfKaestchen.checked = zustand === 'checked';
+  kopfKaestchen.indeterminate = zustand === 'indeterminate';
+  const name = document.createElement('span');
+  name.textContent = stufe.name;
+  label.append(kopfKaestchen, name);
+
+  const offen = offeneStufen.has(stufe.id);
+  const umschalten = document.createElement('button');
+  umschalten.type = 'button';
+  umschalten.className = 'eingrenzung-stufe-umschalten';
+  umschalten.dataset.wissensstufeUmschalten = stufe.id;
+  umschalten.setAttribute('aria-expanded', String(offen));
+  umschalten.setAttribute('aria-label', `Lektionen von ${stufe.name} ${offen ? 'einklappen' : 'aufklappen'}`);
+  umschalten.textContent = offen ? '▾' : '▸';
+
+  kopf.append(label, umschalten);
+
+  const liste = baueLektionenListe(stufe.lektionen);
+  liste.hidden = !offen;
+
+  container.append(kopf, liste);
+  return container;
+}
+
+/** Haelt das "Alle Lektionen"-Kaestchen synchron zum Tri-State der Gesamtauswahl. */
+function aktualisiereAlleLektionenKaestchen() {
+  const zustand = stufenZustand(katalog.metadaten.lektionen, baumAuswahl);
+  anzeige.eingrenzungAlle.checked = zustand === 'checked';
+  anzeige.eingrenzungAlle.indeterminate = zustand === 'indeterminate';
+}
+
+/**
+ * Zeichnet den Lektionen-Auswahlbaum neu: flache Liste bei genau einer
+ * Wissensstufe, sonst gruppiert mit Stufen-Kopfzeilen.
+ */
+function renderEingrenzungsBaum() {
+  aktualisiereAlleLektionenKaestchen();
+  const stufen = baueStufenMitLektionen(katalog);
+  if (stufen.length <= 1) {
+    anzeige.eingrenzungBaum.replaceChildren(baueLektionenListe(stufen[0]?.lektionen ?? []));
+    return;
+  }
+  anzeige.eingrenzungBaum.replaceChildren(...stufen.map(baueStufeZeile));
+}
+
+/**
+ * Baut den Baum erstmalig auf: alle Stufen starten aufgeklappt, alle
+ * Lektionen-Kaestchen starten angehakt (keine Einschraenkung ist so sichtbar
+ * "alles angehakt" statt aus einer leeren Auswahl abgeleitet).
+ */
+function initialisiereEingrenzungsBaum() {
+  offeneStufen = new Set(katalog.metadaten.wissensstufen.map((stufe) => stufe.id));
+  baumAuswahl = alleLektionIds(katalog);
+  renderEingrenzungsBaum();
 }
 
 /** @returns {HTMLOptionElement[]} Je eine <option> pro Wissensstufe, nach Reihenfolge sortiert. */
@@ -265,65 +374,18 @@ function baueWissensstufenOptionen() {
     });
 }
 
-/** Fuellt Wissensstufen-Auswahl und Lektionen-Liste der Eingrenzung. */
-function fuelleEingrenzungsAuswahl() {
-  anzeige.eingrenzungWissensstufe.append(...baueWissensstufenOptionen());
-
-  anzeige.eingrenzungLektionen.replaceChildren(
-    ...katalog.metadaten.lektionen.map((lektion) => {
-      const zeile = document.createElement('li');
-      const feld = document.createElement('label');
-      const kaestchen = document.createElement('input');
-      kaestchen.type = 'checkbox';
-      kaestchen.name = 'eingrenzung-lektion';
-      kaestchen.value = lektion.id;
-      const text = document.createElement('span');
-      text.textContent = `Lektion ${lektion.nummer}: ${lektion.titel}`;
-      feld.append(kaestchen, text);
-      zeile.append(feld);
-      return zeile;
-    }),
-  );
-}
-
-/** @returns {string[]} Die Kennungen der in der Eingrenzung angehakten Lektionen. */
-function gewaehlteLektionen() {
-  return [
-    .../** @type {NodeListOf<HTMLInputElement>} */ (
-      anzeige.eingrenzungLektionen.querySelectorAll('input[type="checkbox"]:checked')
-    ),
-  ].map((kaestchen) => kaestchen.value);
-}
-
-/** Uebernimmt die in der Auswahl getroffene Eingrenzung und startet neu. */
-function uebernehmeEingrenzung() {
-  const lektionen = gewaehlteLektionen();
-  const wissensstufe = anzeige.eingrenzungWissensstufe.value;
-  /** @type {Eingrenzung | null} */
-  let neu = null;
-  // Wissensstufe und Lektionen schliessen sich gegenseitig aus (siehe die
-  // Ereignis-Handler unten, die bei Auswahl der einen die andere zuruecksetzen);
-  // Lektionen haben Vorrang, falls dennoch beides gesetzt ist.
-  if (lektionen.length > 0) neu = { typ: 'lektion', ids: lektionen };
-  else if (wissensstufe !== '') neu = { typ: 'wissensstufe', id: wissensstufe };
-
-  engine.setzeEingrenzung(neu);
-  anzeige.eingrenzungAuswahl.open = false;
+/**
+ * Wendet die im Baum angehakte Auswahl plus Problemfragen-Kaestchen sofort an.
+ * Es gibt keinen separaten "Übernehmen"-Button: Jede Aenderung an Baum oder
+ * Kaestchen wirkt unmittelbar. Die angezeigte Frage bleibt dabei stehen,
+ * solange sie weiterhin zur Eingrenzung passt; nur wenn sie herausfaellt,
+ * wird eine neue gezogen.
+ */
+function wendeEingrenzungAn() {
+  const { lektionen } = verdichteAuswahl(katalog, baumAuswahl);
+  engine.setzeEingrenzung({ lektionen, nurProblemfragen: anzeige.eingrenzungProblemfragen.checked });
   zeichneEingrenzung();
-  zeigeNaechsteFrage();
-}
-
-/** Hebt eine aktive Eingrenzung auf und startet den Uebungslauf neu. */
-function hebeEingrenzungAuf() {
-  engine.setzeEingrenzung(null);
-  anzeige.eingrenzungWissensstufe.value = '';
-  for (const kaestchen of /** @type {NodeListOf<HTMLInputElement>} */ (
-    anzeige.eingrenzungLektionen.querySelectorAll('input[type="checkbox"]')
-  )) {
-    kaestchen.checked = false;
-  }
-  zeichneEingrenzung();
-  zeigeNaechsteFrage();
+  if (!aktuelleFrage || !engine.istZugelassen(aktuelleFrage.id)) zeigeNaechsteFrage();
 }
 
 /** @returns {string[]} */
@@ -588,9 +650,11 @@ const ZEICHNER = {
   lernfortschritt: zeichneLernfortschritt,
   // Eine angefangene, noch nicht ausgewertete Frage ueberdauert einen
   // Ansichtswechsel; sonst wuerde ein Blick auf den Lernfortschritt sie verwerfen.
+  // Faellt sie zwischenzeitlich aus der Eingrenzung heraus (z. B. durch den
+  // "Problemfragen üben"-Kurzbefehl), wird trotzdem neu gezogen.
   ueben: () => {
     zeichneEingrenzung();
-    if (aktuelleFrage === null || beantwortet) zeigeNaechsteFrage();
+    if (aktuelleFrage === null || beantwortet || !engine.istZugelassen(aktuelleFrage.id)) zeigeNaechsteFrage();
   },
   // Eine laufende oder abgeschlossene Pruefung ueberdauert ebenfalls einen
   // Ansichtswechsel; erst „Neue Prüfung" oder „Abbrechen" setzen sie zurueck.
@@ -699,28 +763,70 @@ anzeige.weiter.addEventListener('click', () => {
   window.scrollTo({ top: 0 });
 });
 
-anzeige.eingrenzungUebernehmen.addEventListener('click', uebernehmeEingrenzung);
-anzeige.eingrenzungAufheben.addEventListener('click', hebeEingrenzungAuf);
+/**
+ * Zeichnet den Baum neu und stellt anschliessend den Fokus auf das per
+ * Selektor benannte Element wieder her. `renderEingrenzungsBaum` ersetzt den
+ * kompletten Teilbaum ueber `replaceChildren`, wodurch ein per Tastatur
+ * fokussiertes Kaestchen sonst aus dem Dokument entfernt und der Fokus auf
+ * `<body>` zurueckgesetzt wuerde.
+ * @param {string} fokusSelektor
+ */
+function renderEingrenzungsBaumMitFokus(fokusSelektor) {
+  renderEingrenzungsBaum();
+  /** @type {HTMLElement | null} */ (anzeige.eingrenzungBaum.querySelector(fokusSelektor))?.focus();
+}
 
-// Wissensstufe und Lektionen schliessen sich gegenseitig aus: Die Auswahl der
-// einen setzt die andere zurueck, damit die Anzeige nie beide gleichzeitig
-// gewaehlt zeigt, obwohl nur eine davon uebernommen wuerde.
-anzeige.eingrenzungWissensstufe.addEventListener('change', () => {
-  if (anzeige.eingrenzungWissensstufe.value === '') return;
-  for (const kaestchen of /** @type {NodeListOf<HTMLInputElement>} */ (
-    anzeige.eingrenzungLektionen.querySelectorAll('input[type="checkbox"]')
-  )) {
-    kaestchen.checked = false;
+// Delegiert, statt an jedes Kaestchen einzeln zu binden: Die Baum-Kaestchen
+// werden bei jeder Aenderung neu gezeichnet (Tri-State der Stufen-Kopfzeile).
+anzeige.eingrenzungBaum.addEventListener('change', (ereignis) => {
+  const ziel = ereignis.target;
+  if (!(ziel instanceof HTMLInputElement) || ziel.type !== 'checkbox') return;
+
+  if (ziel.classList.contains('eingrenzung-stufe-kaestchen')) {
+    const stufeId = /** @type {string} */ (ziel.dataset.wissensstufe);
+    const stufe = baueStufenMitLektionen(katalog).find((kandidat) => kandidat.id === stufeId);
+    if (!stufe) return;
+    for (const lektion of stufe.lektionen) {
+      if (ziel.checked) baumAuswahl.add(lektion.id);
+      else baumAuswahl.delete(lektion.id);
+    }
+    renderEingrenzungsBaumMitFokus(`.eingrenzung-stufe-kaestchen[data-wissensstufe="${CSS.escape(stufeId)}"]`);
+  } else if (ziel.name === 'eingrenzung-lektion') {
+    if (ziel.checked) baumAuswahl.add(ziel.value);
+    else baumAuswahl.delete(ziel.value);
+    renderEingrenzungsBaumMitFokus(`input[name="eingrenzung-lektion"][value="${CSS.escape(ziel.value)}"]`);
+  } else {
+    return;
   }
+  wendeEingrenzungAn();
 });
 
-anzeige.eingrenzungLektionen.addEventListener('change', (ereignis) => {
-  if (!(/** @type {HTMLInputElement} */ (ereignis.target).checked)) return;
-  anzeige.eingrenzungWissensstufe.value = '';
+anzeige.eingrenzungProblemfragen.addEventListener('change', wendeEingrenzungAn);
+
+// Haengt nicht am Baum-Container, da es ausserhalb von #eingrenzung-baum
+// liegt und bei dessen Neuzeichnen nicht mit ersetzt wird.
+anzeige.eingrenzungAlle.addEventListener('change', () => {
+  baumAuswahl = anzeige.eingrenzungAlle.checked ? alleLektionIds(katalog) : new Set();
+  renderEingrenzungsBaum();
+  wendeEingrenzungAn();
+});
+
+anzeige.eingrenzungBaum.addEventListener('click', (ereignis) => {
+  const ziel = ereignis.target;
+  const schaltflaeche = ziel instanceof HTMLElement ? ziel.closest('[data-wissensstufe-umschalten]') : null;
+  if (!(schaltflaeche instanceof HTMLElement)) return;
+  const stufeId = /** @type {string} */ (schaltflaeche.dataset.wissensstufeUmschalten);
+  if (offeneStufen.has(stufeId)) offeneStufen.delete(stufeId);
+  else offeneStufen.add(stufeId);
+  renderEingrenzungsBaumMitFokus(`[data-wissensstufe-umschalten="${CSS.escape(stufeId)}"]`);
 });
 
 anzeige.problemfragenUeben.addEventListener('click', () => {
-  engine.setzeEingrenzung({ typ: 'problemfragen' });
+  engine.setzeEingrenzung({ lektionen: null, nurProblemfragen: true });
+  // Keine Lektionen-Einschraenkung: der Baum zeigt das als "alles angehakt".
+  baumAuswahl = alleLektionIds(katalog);
+  anzeige.eingrenzungProblemfragen.checked = true;
+  renderEingrenzungsBaum();
   window.location.hash = '#/ueben';
 });
 
@@ -765,7 +871,7 @@ try {
   pruefungsstand = liesOffenePruefung(pruefungSpeicher, katalog);
   anzeige.pruefungFortsetzenHinweis.hidden = pruefungsstand === null;
   zeigeHerkunft();
-  fuelleEingrenzungsAuswahl();
+  initialisiereEingrenzungsBaum();
   fuellePruefungsWissensstufen();
   if (engine.lernstandVerworfen) {
     anzeige.lernstandhinweis.textContent =

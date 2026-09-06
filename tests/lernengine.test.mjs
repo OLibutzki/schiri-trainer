@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { erzeugeLernEngine, LERN_KONSTANTEN } from '../app/js/lernengine.js';
+import { erzeugeLernEngine, LERN_KONSTANTEN, LEERE_EINGRENZUNG, istEingegrenzt } from '../app/js/lernengine.js';
 import { arbeitsspeicher, leseLernstand } from '../app/js/lernstand.js';
 
 // Die Tests treiben die Engine ueber ihre Schnittstelle. Ausnahme sind drei
@@ -291,7 +291,7 @@ test('der Lernfortschritt wird je Wissensstufe und je Lektion aufgeschluesselt',
 
 test('eine Eingrenzung auf eine Lektion laesst nur deren Fragen zu', () => {
   const { engine } = engineMit({ fragen: 4 });
-  engine.setzeEingrenzung({ typ: 'lektion', ids: ['basiswissen-1'] });
+  engine.setzeEingrenzung({ lektionen: ['basiswissen-1'], nurProblemfragen: false });
   for (let i = 0; i < 200; i += 1) {
     const frage = engine.naechsteFrage();
     assert.ok(frage);
@@ -299,11 +299,16 @@ test('eine Eingrenzung auf eine Lektion laesst nur deren Fragen zu', () => {
   }
 });
 
-test('eine Eingrenzung auf eine Wissensstufe laesst nur deren Fragen zu', () => {
+test('eine Eingrenzung auf alle Lektionen einer Wissensstufe laesst nur deren Fragen zu', () => {
   const { katalog, engine } = engineMit({ fragen: 4 });
   katalog.metadaten.wissensstufen.push({ id: 'aufbauwissen', name: 'Aufbauwissen', reihenfolge: 2 });
+  katalog.metadaten.lektionen.push({ id: 'aufbauwissen-1', wissensstufe: 'aufbauwissen', nummer: 1, titel: 'Dritte' });
   katalog.fragen[3].wissensstufe = 'aufbauwissen';
-  engine.setzeEingrenzung({ typ: 'wissensstufe', id: 'basiswissen' });
+  katalog.fragen[3].lektion = 'aufbauwissen-1';
+  // Es gibt keine eigene Wissensstufen-Dimension mehr: Eine Wissensstufe wird
+  // eingegrenzt, indem alle ihre Lektionen aufgefuehrt werden (so leitet der
+  // Baum das auch ab, wenn eine Stufen-Kopfzeile voll angehakt ist).
+  engine.setzeEingrenzung({ lektionen: ['basiswissen-1', 'basiswissen-2'], nurProblemfragen: false });
   for (let i = 0; i < 200; i += 1) {
     assert.notEqual(engine.naechsteFrage()?.id, 'basiswissen-4');
   }
@@ -312,7 +317,56 @@ test('eine Eingrenzung auf eine Wissensstufe laesst nur deren Fragen zu', () => 
 test('eine Eingrenzung auf Problemfragen laesst nur diese zu', () => {
   const { katalog, engine } = engineMit({ fragen: 4 });
   engine.beantworte(katalog.fragen[0], ['b']);
-  engine.setzeEingrenzung({ typ: 'problemfragen' });
+  engine.setzeEingrenzung({ lektionen: null, nurProblemfragen: true });
+  for (let i = 0; i < 50; i += 1) {
+    assert.equal(engine.naechsteFrage()?.id, 'basiswissen-1');
+  }
+});
+
+test('eine ueber mehrere Wissensstufen kombinierte Lektionsauswahl laesst genau deren Fragen zu', () => {
+  // Regressionstest: Eine Eingrenzung ist eine einzige, woertliche Liste von
+  // Lektion-Ids statt zweier getrennter, ueber Schnittmenge kombinierter
+  // Wissensstufen-/Lektionsdimensionen. Mit getrennten Dimensionen haette
+  // "ganze Stufe A + eine Lektion aus Stufe B" faelschlich zu keiner
+  // zugelassenen Frage gefuehrt (Schnittmenge zweier disjunkter Mengen).
+  const { katalog, engine } = engineMit({ fragen: 4 });
+  katalog.metadaten.wissensstufen.push({ id: 'aufbauwissen', name: 'Aufbauwissen', reihenfolge: 2 });
+  katalog.metadaten.lektionen.push(
+    { id: 'aufbauwissen-1', wissensstufe: 'aufbauwissen', nummer: 1, titel: 'Dritte' },
+    { id: 'aufbauwissen-2', wissensstufe: 'aufbauwissen', nummer: 2, titel: 'Vierte' },
+  );
+  const aufbauFrage = (id, lektion) => ({
+    id,
+    wissensstufe: 'aufbauwissen',
+    lektion,
+    nummer: 1,
+    text: `${id}?`,
+    optionen: [
+      { buchstabe: 'a', text: 'richtig', korrekt: true },
+      { buchstabe: 'b', text: 'falsch', korrekt: false },
+    ],
+  });
+  katalog.fragen.push(aufbauFrage('aufbauwissen-1', 'aufbauwissen-1'), aufbauFrage('aufbauwissen-2', 'aufbauwissen-2'));
+
+  // Ganz "basiswissen" (beide seiner Lektionen, Fragen 1-4) plus nur eine der
+  // beiden Lektionen von "aufbauwissen" (Frage "aufbauwissen-1").
+  engine.setzeEingrenzung({
+    lektionen: ['basiswissen-1', 'basiswissen-2', 'aufbauwissen-1'],
+    nurProblemfragen: false,
+  });
+  const gesehen = new Set();
+  for (let i = 0; i < 200; i += 1) gesehen.add(engine.naechsteFrage()?.id);
+  assert.deepEqual(
+    gesehen,
+    new Set(['basiswissen-1', 'basiswissen-2', 'basiswissen-3', 'basiswissen-4', 'aufbauwissen-1']),
+  );
+});
+
+test('Nur-Problemfragen wirkt zusaetzlich innerhalb der Lektionseingrenzung', () => {
+  const { katalog, engine } = engineMit({ fragen: 4 });
+  engine.beantworte(katalog.fragen[0], ['b']); // basiswissen-1, Lektion 1, ist Problemfrage
+  engine.beantworte(katalog.fragen[2], ['b']); // basiswissen-3, Lektion 2, ist Problemfrage
+  engine.setzeEingrenzung({ lektionen: ['basiswissen-1'], nurProblemfragen: true });
   for (let i = 0; i < 50; i += 1) {
     assert.equal(engine.naechsteFrage()?.id, 'basiswissen-1');
   }
@@ -320,27 +374,57 @@ test('eine Eingrenzung auf Problemfragen laesst nur diese zu', () => {
 
 test('eine leere Kandidatenmenge unter Eingrenzung liefert keine Frage statt eines Fehlers', () => {
   const { engine } = engineMit({ fragen: 4 });
-  engine.setzeEingrenzung({ typ: 'problemfragen' });
+  engine.setzeEingrenzung({ lektionen: null, nurProblemfragen: true });
+  assert.equal(engine.naechsteFrage(), null);
+});
+
+test('eine explizit leere Lektionsauswahl laesst keine Frage zu, anders als keine Einschraenkung', () => {
+  const { engine } = engineMit({ fragen: 4 });
+  engine.setzeEingrenzung({ lektionen: [], nurProblemfragen: false });
+  assert.equal(istEingegrenzt(engine.eingrenzung()), true);
   assert.equal(engine.naechsteFrage(), null);
 });
 
 test('eine einelementige Kandidatenmenge unter Eingrenzung wird wiederholt gestellt', () => {
   // katalogMit(3) legt Frage 3 allein in Lektion 2 (siehe katalogMit).
   const { engine } = engineMit({ fragen: 3 });
-  engine.setzeEingrenzung({ typ: 'lektion', ids: ['basiswissen-2'] });
+  engine.setzeEingrenzung({ lektionen: ['basiswissen-2'], nurProblemfragen: false });
   assert.equal(engine.naechsteFrage()?.id, 'basiswissen-3');
   assert.equal(engine.naechsteFrage()?.id, 'basiswissen-3');
 });
 
-test('das Aufheben einer Eingrenzung gibt wieder den gesamten Katalog frei', () => {
+test('eine leere Eingrenzung laesst den gesamten Katalog zu', () => {
   const { engine } = engineMit({ fragen: 4 });
-  engine.setzeEingrenzung({ typ: 'lektion', ids: ['basiswissen-1'] });
-  engine.naechsteFrage();
-  engine.setzeEingrenzung(null);
-  assert.equal(engine.eingrenzung(), null);
+  assert.equal(istEingegrenzt(engine.eingrenzung()), false);
   const gesehen = new Set();
   for (let i = 0; i < 200; i += 1) gesehen.add(engine.naechsteFrage()?.id);
   assert.ok(gesehen.has('basiswissen-3') || gesehen.has('basiswissen-4'));
+});
+
+test('das Aufheben einer Eingrenzung gibt wieder den gesamten Katalog frei', () => {
+  const { engine } = engineMit({ fragen: 4 });
+  engine.setzeEingrenzung({ lektionen: ['basiswissen-1'], nurProblemfragen: false });
+  engine.naechsteFrage();
+  engine.setzeEingrenzung(LEERE_EINGRENZUNG);
+  assert.equal(istEingegrenzt(engine.eingrenzung()), false);
+  const gesehen = new Set();
+  for (let i = 0; i < 200; i += 1) gesehen.add(engine.naechsteFrage()?.id);
+  assert.ok(gesehen.has('basiswissen-3') || gesehen.has('basiswissen-4'));
+});
+
+test('istZugelassen meldet, ob eine Frage innerhalb der aktuellen Eingrenzung liegt', () => {
+  const { engine } = engineMit({ fragen: 4 });
+  engine.setzeEingrenzung({ lektionen: ['basiswissen-1'], nurProblemfragen: false });
+  assert.equal(engine.istZugelassen('basiswissen-1'), true);
+  assert.equal(engine.istZugelassen('basiswissen-2'), true);
+  assert.equal(engine.istZugelassen('basiswissen-3'), false);
+});
+
+test('istZugelassen folgt einer geaenderten Eingrenzung sofort', () => {
+  const { engine } = engineMit({ fragen: 4 });
+  assert.equal(engine.istZugelassen('basiswissen-3'), true);
+  engine.setzeEingrenzung({ wissensstufen: [], lektionen: ['basiswissen-1'], nurProblemfragen: false });
+  assert.equal(engine.istZugelassen('basiswissen-3'), false);
 });
 
 test('Zuruecksetzen loescht den Lernfortschritt dauerhaft', () => {

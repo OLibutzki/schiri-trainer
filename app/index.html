@@ -47,29 +47,20 @@
         </section>
 
         <section id="ansicht-ueben" class="ansicht" hidden>
-          <section class="eingrenzung" id="eingrenzung-aktiv" hidden>
-            <p id="eingrenzung-beschreibung"></p>
-            <button class="schaltflaeche" type="button" id="eingrenzung-aufheben">Eingrenzung aufheben</button>
-          </section>
-
           <details class="eingrenzung-auswahl" id="eingrenzung-auswahl">
-            <summary>Übungslauf eingrenzen</summary>
+            <summary><span id="eingrenzung-zusammenfassung">Alle Lektionen</span></summary>
 
-            <div class="eingrenzung-feld">
-              <label for="eingrenzung-wissensstufe">Wissensstufe</label>
-              <select id="eingrenzung-wissensstufe">
-                <option value="">Alle</option>
-              </select>
-            </div>
+            <label class="eingrenzung-alle">
+              <input type="checkbox" id="eingrenzung-alle-lektionen" checked />
+              Alle Lektionen
+            </label>
 
-            <div class="eingrenzung-feld">
-              <p id="eingrenzung-lektionen-label">Lektionen</p>
-              <ul class="eingrenzung-lektionen" id="eingrenzung-lektionen" aria-labelledby="eingrenzung-lektionen-label"></ul>
-            </div>
+            <div class="eingrenzung-feld" id="eingrenzung-baum"></div>
 
-            <button class="schaltflaeche schaltflaeche--haupt" type="button" id="eingrenzung-uebernehmen">
-              Eingrenzung übernehmen
-            </button>
+            <label class="eingrenzung-problemfragen">
+              <input type="checkbox" id="eingrenzung-problemfragen" />
+              Nur Problemfragen
+            </label>
           </details>
 
           <p class="frage-kennung" id="frage-kennung"></p>
