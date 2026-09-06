@@ -56,41 +56,20 @@ export function stufenZustand(lektionenDerStufe, gewaehlteLektionIds) {
 }
 
 /**
- * Verdichtet die angehakten Lektionen zurueck ins Eingrenzungsformat: Ist eine
- * Stufe vollstaendig angehakt, wandert ihre Id in `wissensstufen` statt all
- * ihrer Lektionen einzeln in `lektionen` — sowohl kompakter als auch robust
- * gegenueber spaeter hinzukommenden Lektionen der Stufe. Ist wirklich jede
- * Lektion des Katalogs angehakt (der Ausgangszustand des Baums), gilt das
- * unmittelbar als keine Einschraenkung statt als eine Liste aller Stufen.
+ * Verdichtet die angehakten Lektionen zurueck ins Eingrenzungsformat. Ist
+ * wirklich jede Lektion des Katalogs angehakt (der Ausgangszustand des
+ * Baums), gilt das als keine Einschraenkung (`lektionen: null`) statt als
+ * woertliche Liste aller Lektionen. Jede andere Auswahl — auch eine leere! —
+ * wird woertlich uebernommen: Nichts angehakt ergibt `lektionen: []` und
+ * damit keine einzige zugelassene Frage, nicht "alle" (siehe `Eingrenzung`).
  * @param {Katalog} katalog
  * @param {ReadonlySet<string>} gewaehlteLektionIds
- * @returns {Pick<Eingrenzung, 'wissensstufen' | 'lektionen'>}
+ * @returns {Pick<Eingrenzung, 'lektionen'>}
  */
 export function verdichteAuswahl(katalog, gewaehlteLektionIds) {
   const alle = alleLektionIds(katalog);
   if (alle.size > 0 && [...alle].every((id) => gewaehlteLektionIds.has(id))) {
-    return { wissensstufen: [], lektionen: [] };
+    return { lektionen: null };
   }
-
-  /** @type {string[]} */
-  const wissensstufen = [];
-  /** @type {string[]} */
-  const lektionen = [];
-
-  for (const stufe of baueStufenMitLektionen(katalog)) {
-    switch (stufenZustand(stufe.lektionen, gewaehlteLektionIds)) {
-      case 'checked':
-        wissensstufen.push(stufe.id);
-        break;
-      case 'indeterminate':
-        for (const lektion of stufe.lektionen) {
-          if (gewaehlteLektionIds.has(lektion.id)) lektionen.push(lektion.id);
-        }
-        break;
-      default:
-        break;
-    }
-  }
-
-  return { wissensstufen, lektionen };
+  return { lektionen: [...gewaehlteLektionIds] };
 }

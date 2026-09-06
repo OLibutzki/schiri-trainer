@@ -54,30 +54,31 @@ test('stufenZustand ist indeterminate bei einer Teilauswahl', () => {
   assert.equal(stufenZustand(lektionen, new Set(['basiswissen-1'])), 'indeterminate');
 });
 
-test('verdichteAuswahl traegt eine vollstaendig gewaehlte Stufe als Wissensstufe ein', () => {
+test('verdichteAuswahl uebernimmt eine Teilauswahl woertlich als Lektionen-Liste', () => {
   const katalog = katalogMitZweiStufen();
   const auswahl = verdichteAuswahl(katalog, new Set(['basiswissen-1', 'basiswissen-2']));
-  assert.deepEqual(auswahl, { wissensstufen: ['basiswissen'], lektionen: [] });
+  assert.deepEqual(auswahl, { lektionen: ['basiswissen-1', 'basiswissen-2'] });
 });
 
-test('verdichteAuswahl traegt eine Teilauswahl als einzelne Lektionen ein', () => {
+test('verdichteAuswahl uebernimmt eine einzelne Lektion woertlich', () => {
   const katalog = katalogMitZweiStufen();
   const auswahl = verdichteAuswahl(katalog, new Set(['basiswissen-1']));
-  assert.deepEqual(auswahl, { wissensstufen: [], lektionen: ['basiswissen-1'] });
+  assert.deepEqual(auswahl, { lektionen: ['basiswissen-1'] });
 });
 
-test('verdichteAuswahl kombiniert mehrere Stufen und Teilauswahlen', () => {
+test('verdichteAuswahl kombiniert Lektionen ueber mehrere Stufen hinweg woertlich', () => {
   const katalog = katalogMitZweiStufen();
-  const auswahl = verdichteAuswahl(
-    katalog,
-    new Set(['basiswissen-1', 'basiswissen-2', 'aufbauwissen-1']),
-  );
-  assert.deepEqual(auswahl, { wissensstufen: ['basiswissen'], lektionen: ['aufbauwissen-1'] });
+  const auswahl = verdichteAuswahl(katalog, new Set(['basiswissen-1', 'basiswissen-2', 'aufbauwissen-1']));
+  assert.deepEqual(auswahl, { lektionen: ['basiswissen-1', 'basiswissen-2', 'aufbauwissen-1'] });
 });
 
-test('verdichteAuswahl ohne jede Auswahl liefert leere Teilmengen', () => {
+test('verdichteAuswahl ohne jede Auswahl liefert eine leere Liste, nicht keine Einschraenkung', () => {
+  // Das ist der Kern der Unterscheidung: "nichts angehakt" ist woertlich eine
+  // leere Lektionsliste (laesst keine Frage zu), nicht gleichbedeutend mit
+  // "keine Einschraenkung" (dafuer steht ausschliesslich `lektionen: null`,
+  // siehe den naechsten Test).
   const katalog = katalogMitZweiStufen();
-  assert.deepEqual(verdichteAuswahl(katalog, new Set()), { wissensstufen: [], lektionen: [] });
+  assert.deepEqual(verdichteAuswahl(katalog, new Set()), { lektionen: [] });
 });
 
 test('alleLektionIds enthaelt jede Lektion-Id des Katalogs', () => {
@@ -88,9 +89,9 @@ test('alleLektionIds enthaelt jede Lektion-Id des Katalogs', () => {
   );
 });
 
-test('verdichteAuswahl liefert leere Teilmengen, wenn wirklich jede Lektion angehakt ist', () => {
+test('verdichteAuswahl liefert keine Einschraenkung, wenn wirklich jede Lektion angehakt ist', () => {
   // Der Ausgangszustand des Baums: alle Kaestchen angehakt bedeutet keine
-  // Einschraenkung, nicht eine Liste aller Wissensstufen.
+  // Einschraenkung (`lektionen: null`), nicht eine woertliche Liste aller Ids.
   const katalog = katalogMitZweiStufen();
-  assert.deepEqual(verdichteAuswahl(katalog, alleLektionIds(katalog)), { wissensstufen: [], lektionen: [] });
+  assert.deepEqual(verdichteAuswahl(katalog, alleLektionIds(katalog)), { lektionen: null });
 });
