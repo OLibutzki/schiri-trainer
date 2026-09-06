@@ -14,6 +14,7 @@
         <nav class="navigation" id="navigation" aria-label="Ansichten">
           <a href="#/" data-ansicht="start">Start</a>
           <a href="#/ueben" data-ansicht="ueben">Üben</a>
+          <a href="#/pruefung" data-ansicht="pruefung">Prüfung</a>
           <a href="#/lernfortschritt" data-ansicht="lernfortschritt">Lernfortschritt</a>
         </nav>
       </header>
@@ -29,6 +30,7 @@
           <p class="lernfortschritt-erlaeuterung" id="start-erlaeuterung"></p>
           <div class="schaltflaechen">
             <a class="schaltflaeche schaltflaeche--haupt" href="#/ueben">Üben</a>
+            <a class="schaltflaeche" href="#/pruefung">Prüfung starten</a>
             <a class="schaltflaeche" href="#/lernfortschritt">Lernfortschritt ansehen</a>
           </div>
         </section>
@@ -78,6 +80,72 @@
           </section>
 
           <p class="meldung" id="keine-frage" hidden></p>
+        </section>
+
+        <section id="ansicht-pruefung" class="ansicht" hidden>
+          <section id="pruefung-einrichtung">
+            <h2>Prüfung</h2>
+            <p class="hinweis">
+              Eine vorab gewählte Zahl von Fragen am Stück, ohne Rückmeldung zwischendurch. Das Ergebnis
+              erscheint erst am Ende; der Lernfortschritt bleibt unberührt.
+            </p>
+
+            <div class="eingrenzung-feld">
+              <label for="pruefung-fragenzahl">Fragenzahl</label>
+              <select id="pruefung-fragenzahl">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="30">30</option>
+                <option value="40">40</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+
+            <div class="eingrenzung-feld" id="pruefung-wissensstufe-feld">
+              <label for="pruefung-wissensstufe">Wissensstufe</label>
+              <select id="pruefung-wissensstufe">
+                <option value="">Alle</option>
+              </select>
+            </div>
+
+            <button class="schaltflaeche schaltflaeche--haupt" type="button" id="pruefung-starten">
+              Prüfung starten
+            </button>
+          </section>
+
+          <section id="pruefung-laufend" hidden>
+            <p class="frage-kennung" id="pruefung-fortschritt"></p>
+            <h2 class="frage-text" id="pruefung-frage-text"></h2>
+
+            <form id="pruefung-formular">
+              <ul class="optionen" id="pruefung-optionen"></ul>
+              <p class="hinweis">Mehrfachauswahl möglich.</p>
+              <button class="schaltflaeche schaltflaeche--haupt" type="submit" id="pruefung-abgeben">
+                Antwort abgeben
+              </button>
+            </form>
+          </section>
+
+          <section id="pruefung-abbrechen-abschnitt">
+            <button class="schaltflaeche schaltflaeche--gefahr" type="button" id="pruefung-abbrechen" hidden>
+              Prüfung abbrechen
+            </button>
+          </section>
+
+          <section id="pruefung-ergebnis" hidden>
+            <h2>Ergebnis</h2>
+            <p class="lernfortschritt-erlaeuterung" id="pruefung-punktzahl"></p>
+
+            <h3 id="pruefung-falsche-titel">Falsch beantwortete Fragen</h3>
+            <p id="pruefung-alle-richtig" hidden>Alle Fragen wurden richtig beantwortet.</p>
+            <ul class="pruefung-falsche" id="pruefung-falsche"></ul>
+
+            <div class="schaltflaechen">
+              <button class="schaltflaeche schaltflaeche--haupt" type="button" id="pruefung-neu">
+                Neue Prüfung
+              </button>
+            </div>
+          </section>
         </section>
 
         <section id="ansicht-lernfortschritt" class="ansicht" hidden>

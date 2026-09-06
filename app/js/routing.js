@@ -2,7 +2,7 @@
 // zwischen den Ansichten navigiert, statt die Anwendung zu verlassen, und ein
 // Neuladen wieder auf derselben Ansicht landet (Issue #5).
 
-/** @typedef {'start' | 'ueben' | 'lernfortschritt'} Ansicht */
+/** @typedef {'start' | 'ueben' | 'lernfortschritt' | 'pruefung'} Ansicht */
 
 /** Die Startansicht; sie faengt auch jede unbekannte Adresse auf. */
 export const START_ANSICHT = /** @type {Ansicht} */ ('start');
@@ -12,6 +12,7 @@ const NACH_PFAD = {
   '/': START_ANSICHT,
   '/ueben': 'ueben',
   '/lernfortschritt': 'lernfortschritt',
+  '/pruefung': 'pruefung',
 };
 
 /**
