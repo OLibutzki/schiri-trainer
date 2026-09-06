@@ -1,6 +1,13 @@
 /* Mobile-first; am Desktop eine zentrierte Spalte. Helles und dunkles
    Erscheinungsbild folgen der Systemeinstellung, es gibt keinen Umschalter. */
 
+/* Reserviert die Scrollbar-Spalte immer, statt sie nur bei Bedarf einzublenden:
+   Sonst springt der Inhalt beim Wechsel zu einer laengeren Ansicht (etwa
+   Lernfortschritt) seitlich, weil der verfuegbare Platz schrumpft. */
+html {
+  scrollbar-gutter: stable;
+}
+
 :root {
   --grund: #f7f7f8;
   --flaeche: #ffffff;
