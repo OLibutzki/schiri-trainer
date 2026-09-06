@@ -5,6 +5,7 @@
 /** @import { LernfortschrittTeil, Eingrenzung, Meisterungswechsel } from './lernengine.js' */
 /** @import { Pruefungsstand } from './pruefung.js' */
 import { ladeKatalog, bezeichneFrage } from './katalog.js';
+import { istAbgabeMoeglich } from './antwort.js';
 import { mische } from './mischen.js';
 import { erzeugeLernEngine, istEingegrenzt } from './lernengine.js';
 import { baueStufenMitLektionen, stufenZustand, verdichteAuswahl, alleLektionIds } from './eingrenzungsbaum.js';
@@ -79,6 +80,7 @@ const anzeige = {
   pruefungFormular: /** @type {HTMLFormElement} */ (element('pruefung-formular')),
   pruefungOptionen: element('pruefung-optionen'),
   pruefungAbgeben: /** @type {HTMLButtonElement} */ (element('pruefung-abgeben')),
+  pruefungAbbrechenAbschnitt: element('pruefung-abbrechen-abschnitt'),
   pruefungAbbrechen: /** @type {HTMLButtonElement} */ (element('pruefung-abbrechen')),
 
   pruefungErgebnis: element('pruefung-ergebnis'),
@@ -195,7 +197,9 @@ function zeigeFrage(frage) {
   anzeige.optionen.replaceChildren(...baueOptionenListe(frage));
 
   anzeige.formular.hidden = false;
-  anzeige.abgeben.disabled = false;
+  // Erst mit angekreuzter Option abgebbar (Issue #27); der change-Listener
+  // auf anzeige.optionen haelt den Zustand danach synchron.
+  anzeige.abgeben.disabled = true;
   anzeige.keineFrage.hidden = true;
   anzeige.rueckmeldung.hidden = true;
   anzeige.rueckmeldung.classList.remove('rueckmeldung--richtig', 'rueckmeldung--falsch');
@@ -394,6 +398,13 @@ function gewaehlteBuchstaben() {
     .map((feld) => feld.value);
 }
 
+/** @returns {string[]} Die angekreuzten Buchstaben der laufenden Pruefungsfrage. */
+function gewaehltePruefungsBuchstaben() {
+  return kaestchenIn(anzeige.pruefungOptionen)
+    .filter((feld) => feld.checked)
+    .map((feld) => feld.value);
+}
+
 /**
  * Fuellt die Wissensstufen-Auswahl der Pruefungseinrichtung. Gibt es nur eine
  * Wissensstufe, entfaellt die Auswahl: Sie waere ohne Wirkung, da "Alle" und
@@ -423,6 +434,8 @@ function zeigePruefungsfrage() {
   const frage = /** @type {Frage} */ (katalog.fragen.find((kandidat) => kandidat.id === frageId));
   anzeige.pruefungFrageText.textContent = frage.text;
   anzeige.pruefungOptionen.replaceChildren(...baueOptionenListe(frage));
+  // Erst mit angekreuzter Option abgebbar, siehe zeigeFrage (Issue #27).
+  anzeige.pruefungAbgeben.disabled = true;
   pruefungAngezeigteFrage = frageId;
 }
 
@@ -431,7 +444,7 @@ function zeichnePruefung() {
   if (!pruefungsstand) {
     anzeige.pruefungEinrichtung.hidden = false;
     anzeige.pruefungLaufend.hidden = true;
-    anzeige.pruefungAbbrechen.hidden = true;
+    anzeige.pruefungAbbrechenAbschnitt.hidden = true;
     anzeige.pruefungErgebnis.hidden = true;
     return;
   }
@@ -440,14 +453,16 @@ function zeichnePruefung() {
 
   if (!istAbgeschlossen(pruefungsstand)) {
     anzeige.pruefungLaufend.hidden = false;
-    anzeige.pruefungAbbrechen.hidden = false;
+    // Der Knopf selbst bleibt ohne eigenes hidden-Attribut: Er sitzt bereits
+    // in diesem Abschnitt, dessen hidden-Zustand ihn mit abdeckt.
+    anzeige.pruefungAbbrechenAbschnitt.hidden = false;
     anzeige.pruefungErgebnis.hidden = true;
     zeigePruefungsfrage();
     return;
   }
 
   anzeige.pruefungLaufend.hidden = true;
-  anzeige.pruefungAbbrechen.hidden = true;
+  anzeige.pruefungAbbrechenAbschnitt.hidden = true;
   anzeige.pruefungErgebnis.hidden = false;
 
   const auswertung = auswertePruefung(katalog, pruefungsstand);
@@ -495,14 +510,15 @@ function startePruefung() {
 
 function werteAusPruefung() {
   if (!pruefungsstand) return;
-  const gewaehlt = kaestchenIn(anzeige.pruefungOptionen)
-    .filter((feld) => feld.checked)
-    .map((feld) => feld.value);
+  const gewaehlt = gewaehltePruefungsBuchstaben();
+  // Zweite Absicherung neben dem deaktivierten Knopf: Ein requestSubmit() per
+  // Eingabetaste beachtet dessen disabled-Zustand nicht (Issue #27).
+  if (!istAbgabeMoeglich(gewaehlt)) return;
   pruefungsstand = beantwortePruefung(pruefungsstand, gewaehlt);
-  // Abgeschlossen gilt eine Pruefung nicht mehr als „offen“: Es gibt nichts
-  // mehr fortzusetzen, der Zwischenstand wird verworfen statt aufgehoben.
-  if (istAbgeschlossen(pruefungsstand)) verwirfOffenePruefung(pruefungSpeicher);
-  else schreibeOffenePruefung(pruefungSpeicher, pruefungsstand);
+  // Bleibt jetzt auch abgeschlossen gespeichert, damit das Ergebnis ein
+  // Neuladen ueberlebt (Issue #30); verworfen wird der Stand erst durch
+  // "Neue Prüfung" oder "Prüfung abbrechen".
+  schreibeOffenePruefung(pruefungSpeicher, pruefungsstand);
   zeichnePruefung();
   zeichneKopf();
   window.scrollTo({ top: 0 });
@@ -563,6 +579,10 @@ function baueOptionenRueckblick(frage, gewaehlt, bewertung) {
 function werteAus() {
   if (!aktuelleFrage || beantwortet) return;
   const gewaehlt = gewaehlteBuchstaben();
+  // Zweite Absicherung neben dem deaktivierten Knopf: Ein requestSubmit()
+  // per Eingabetaste (behandleTastatur) beachtet dessen disabled-Zustand
+  // nicht (Issue #27).
+  if (!istAbgabeMoeglich(gewaehlt)) return;
   const bewertung = engine.beantworte(aktuelleFrage, gewaehlt);
   beantwortet = true;
   markiereBewertung(kaestchen(), gewaehlt, bewertung);
@@ -808,6 +828,17 @@ anzeige.formular.addEventListener('submit', (ereignis) => {
   werteAus();
 });
 
+// Haelt "Antwort abgeben" deaktiviert, solange keine Option angekreuzt ist
+// (Issue #27). Delegiert auf die Liste statt an jedes Kaestchen einzeln zu
+// binden, da die Optionen bei jeder Frage neu aufgebaut werden.
+anzeige.optionen.addEventListener('change', () => {
+  anzeige.abgeben.disabled = !istAbgabeMoeglich(gewaehlteBuchstaben());
+});
+
+anzeige.pruefungOptionen.addEventListener('change', () => {
+  anzeige.pruefungAbgeben.disabled = !istAbgabeMoeglich(gewaehltePruefungsBuchstaben());
+});
+
 anzeige.weiter.addEventListener('click', () => {
   zeigeNaechsteFrage();
   window.scrollTo({ top: 0 });
@@ -900,6 +931,10 @@ anzeige.pruefungAbbrechen.addEventListener('click', () => {
 anzeige.pruefungNeu.addEventListener('click', () => {
   pruefungsstand = null;
   pruefungAngezeigteFrage = null;
+  // Der Zwischenstand blieb bis hierhin gespeichert, damit das Ergebnis ein
+  // Neuladen ueberlebt (Issue #30); erst der ausdrueckliche Wechsel zu einer
+  // neuen Pruefung verwirft ihn.
+  verwirfOffenePruefung(pruefungSpeicher);
   zeichnePruefung();
   zeichneKopf();
 });
@@ -915,12 +950,29 @@ anzeige.zuruecksetzen.addEventListener('click', () => {
   zeichneKopf();
 });
 
+// Entfernt den Desktop-Tastaturhinweis auf Beruehrgeraeten ganz aus dem
+// Dokument statt ihn nur per CSS zu verstecken (Issue #31): Ein rein per CSS
+// verstecktes Element bliebe weiterhin Teil des textContent. Dieselbe Media
+// Query wie fuer .option-taste in styles.css, damit Hinweis und
+// Zifferntasten-Anzeige nicht auseinanderlaufen koennen. Einmalig zur
+// Ladezeit ausgewertet (nicht auf spaetere Aenderungen der Zeigergeraete
+// reaktiv, anders als die CSS-Regel) — ein in einem fehlenden matchMedia
+// scheiternder Browser soll dabei nicht die gesamte Anwendung mitreissen.
+try {
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    for (const hinweis of document.querySelectorAll('.hinweis-tastatur')) hinweis.remove();
+  }
+} catch (fehler) {
+  console.warn('Der Tastaturhinweis konnte nicht an das Geraet angepasst werden.', fehler);
+}
+
 try {
   katalog = await ladeKatalog();
   engine = erzeugeLernEngine({ katalog, speicher: browserSpeicher() });
   pruefungSpeicher = browserSpeicher(PRUEFUNGSSTAND_SCHLUESSEL);
-  // Jeder ueberlebende Stand ist unabgeschlossen: Eine abgeschlossene Pruefung
-  // wird beim Auswerten sofort verworfen (siehe werteAusPruefung).
+  // Ueberlebt sowohl eine unabgeschlossene als auch eine bereits ausgewertete
+  // Pruefung (Issue #30): Erst "Neue Prüfung" oder "Prüfung abbrechen"
+  // verwerfen den Stand (siehe dort).
   pruefungsstand = liesOffenePruefung(pruefungSpeicher, katalog);
   zeigeHerkunft();
   initialisiereEingrenzungsBaum();

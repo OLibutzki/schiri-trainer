@@ -30,3 +30,14 @@ export function bewerteAntwort(frage, gewaehlteBuchstaben) {
     uebersehen,
   };
 }
+
+/**
+ * Ob eine Antwort mit der aktuellen Auswahl abgegeben werden darf: nur wenn
+ * mindestens eine Option angekreuzt ist. Eine leere Auswahl gaebe es sonst
+ * als falsch beantwortet durch (Issue #27).
+ * @param {Iterable<string>} gewaehlteBuchstaben
+ * @returns {boolean}
+ */
+export function istAbgabeMoeglich(gewaehlteBuchstaben) {
+  return [...gewaehlteBuchstaben].length > 0;
+}

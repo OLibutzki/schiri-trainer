@@ -262,7 +262,11 @@ body {
   color: var(--schrift-leise);
 }
 
-/* Nur am Desktop sichtbar: An Beruehrgeraeten gibt es keine Zifferntasten. */
+/* Nur am Desktop sichtbar: An Beruehrgeraeten gibt es keine Zifferntasten.
+   Der zugehoerige Tastaturhinweis (.hinweis-tastatur) verwendet dieselbe
+   Media Query, entfernt sich dabei aber per JavaScript ganz aus dem Dokument
+   statt sich nur per CSS zu verstecken (Issue #31, siehe app.js): Sonst
+   bliebe der Desktop-Text auf dem Handy weiterhin im textContent lesbar. */
 @media (hover: hover) and (pointer: fine) {
   .option-taste {
     display: flex;
@@ -429,6 +433,29 @@ body {
   color: var(--falsch);
 }
 
+/* Zurueckhaltender Textknopf statt vollbreiter Flaeche, fuer Aktionen, die
+   nicht neben einer haeufigeren, bestaetigenden Aktion um Aufmerksamkeit
+   konkurrieren sollen (Issue #28: "Prüfung abbrechen" unter "Antwort
+   abgeben"). Behaelt die Berührziel-Mindesthoehe von .schaltflaeche. */
+.schaltflaeche--text {
+  width: auto;
+  margin: 0 auto;
+  background: transparent;
+  border-color: transparent;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+/* Deutlicher Abstand plus optische Trennlinie zur laufenden Prüfung darüber,
+   damit ein zu tiefer Daumen nicht von "Antwort abgeben" auf die
+   unwiderrufliche Abbruch-Aktion rutscht (Issue #28). */
+#pruefung-abbrechen-abschnitt {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rand);
+  text-align: center;
+}
+
 .aufschluesselung {
   list-style: none;
   margin: 0;
@@ -532,6 +559,30 @@ body {
 
 .eingrenzung-feld {
   margin: 0.75rem 0;
+}
+
+/* Nur die direkten Kinder: Der Baum unter #eingrenzung-baum traegt dieselbe
+   Klasse, aber seine verschachtelten Kaestchen-Label sollen unberuehrt
+   bleiben (Issue #29 betrifft nur die beiden <select>-Felder der
+   Pruefungseinrichtung). */
+.eingrenzung-feld > label {
+  display: block;
+  margin: 0 0 0.375rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--schrift);
+}
+
+.eingrenzung-feld > select {
+  display: block;
+  width: 100%;
+  min-height: var(--beruehrziel);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--rand);
+  border-radius: 0.5rem;
+  background: var(--flaeche);
+  color: inherit;
+  font: inherit;
 }
 
 .eingrenzung-stufe {

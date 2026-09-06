@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { bewerteAntwort } from '../app/js/antwort.js';
+import { bewerteAntwort, istAbgabeMoeglich } from '../app/js/antwort.js';
 
 /** @param {string[]} korrekteBuchstaben */
 function frageMit(korrekteBuchstaben) {
@@ -44,4 +44,10 @@ test('die Rueckmeldung benennt korrekte, zu Unrecht gewaehlte und uebersehene Op
   assert.deepEqual(bewertung.korrekt, ['a', 'b']);
   assert.deepEqual(bewertung.zuUnrecht, ['c']);
   assert.deepEqual(bewertung.uebersehen, ['b']);
+});
+
+test('eine Abgabe ist erst mit mindestens einer angekreuzten Option moeglich', () => {
+  assert.equal(istAbgabeMoeglich([]), false);
+  assert.equal(istAbgabeMoeglich(['a']), true);
+  assert.equal(istAbgabeMoeglich(new Set(['a', 'b'])), true);
 });

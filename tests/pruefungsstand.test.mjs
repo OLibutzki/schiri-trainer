@@ -45,6 +45,13 @@ test('Geschriebenes wird unveraendert wieder gelesen', () => {
   assert.deepEqual(liesOffenePruefung(speicher, katalog()), stand());
 });
 
+test('ein abgeschlossener Stand (alle Antworten gesetzt) wird ebenso persistiert wie ein offener (Issue #30)', () => {
+  const speicher = arbeitsspeicher();
+  const abgeschlossenerStand = { ...stand(), antworten: [['a'], ['b']] };
+  schreibeOffenePruefung(speicher, abgeschlossenerStand);
+  assert.deepEqual(liesOffenePruefung(speicher, katalog()), abgeschlossenerStand);
+});
+
 test('der geschriebene Bestand traegt die Formatversion', () => {
   const speicher = arbeitsspeicher();
   schreibeOffenePruefung(speicher, stand());

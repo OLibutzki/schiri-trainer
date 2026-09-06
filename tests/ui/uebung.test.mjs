@@ -54,39 +54,31 @@ test('verbirgt die Zifferntasten auf Beruehrgeraeten', async () => {
   assert.ok(!(await seite.isVisible('#optionen .option-taste')), 'Zifferntaste erscheint auf dem Handy');
 });
 
-test(
-  'gibt keine Antwort ohne Auswahl ab',
-  { todo: 'Issue #27' },
-  async () => {
-    const seite = await oeffne(umgebung.browser, umgebung.adresse);
+test('gibt keine Antwort ohne Auswahl ab', async () => {
+  const seite = await oeffne(umgebung.browser, umgebung.adresse);
 
-    assert.ok(
-      await seite.locator('#abgeben').isDisabled(),
-      '„Antwort abgeben" ist aktiv, obwohl nichts angekreuzt ist',
-    );
+  assert.ok(
+    await seite.locator('#abgeben').isDisabled(),
+    '„Antwort abgeben" ist aktiv, obwohl nichts angekreuzt ist',
+  );
 
-    await seite.locator('#optionen .option').first().click();
-    assert.ok(await seite.locator('#abgeben').isEnabled(), 'Knopf bleibt nach der Auswahl inaktiv');
+  await seite.locator('#optionen .option').first().click();
+  assert.ok(await seite.locator('#abgeben').isEnabled(), 'Knopf bleibt nach der Auswahl inaktiv');
 
-    await seite.locator('#optionen .option').first().click();
-    assert.ok(await seite.locator('#abgeben').isDisabled(), 'Knopf bleibt nach dem Abwaehlen aktiv');
-  },
-);
+  await seite.locator('#optionen .option').first().click();
+  assert.ok(await seite.locator('#abgeben').isDisabled(), 'Knopf bleibt nach dem Abwaehlen aktiv');
+});
 
-test(
-  'nennt den Tastaturhinweis nur, wo er zutrifft',
-  { todo: 'Issue #31' },
-  async () => {
-    const handy = await oeffne(umgebung.browser, umgebung.adresse, { geraet: MOBIL });
-    const aufDemHandy = (await handy.textContent('#antwort-formular .hinweis')) ?? '';
-    assert.ok(aufDemHandy.includes('Mehrfachauswahl'), 'Mehrfachauswahl-Hinweis fehlt');
-    assert.ok(!aufDemHandy.includes('Zifferntasten'), 'Desktop-Hinweis steht auf dem Handy');
+test('nennt den Tastaturhinweis nur, wo er zutrifft', async () => {
+  const handy = await oeffne(umgebung.browser, umgebung.adresse, { geraet: MOBIL });
+  const aufDemHandy = (await handy.textContent('#antwort-formular .hinweis')) ?? '';
+  assert.ok(aufDemHandy.includes('Mehrfachauswahl'), 'Mehrfachauswahl-Hinweis fehlt');
+  assert.ok(!aufDemHandy.includes('Zifferntasten'), 'Desktop-Hinweis steht auf dem Handy');
 
-    const rechner = await oeffne(umgebung.browser, umgebung.adresse, { geraet: DESKTOP });
-    const amDesktop = (await rechner.textContent('#antwort-formular .hinweis')) ?? '';
-    assert.ok(amDesktop.includes('Zifferntasten'), 'Desktop-Hinweis fehlt am Desktop');
-  },
-);
+  const rechner = await oeffne(umgebung.browser, umgebung.adresse, { geraet: DESKTOP });
+  const amDesktop = (await rechner.textContent('#antwort-formular .hinweis')) ?? '';
+  assert.ok(amDesktop.includes('Zifferntasten'), 'Desktop-Hinweis fehlt am Desktop');
+});
 
 test(
   'laesst die Frage im oberen Bildschirmdrittel beginnen',

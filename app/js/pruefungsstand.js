@@ -74,8 +74,10 @@ export function liesOffenePruefung(speicher, katalog) {
 }
 
 /**
- * Schreibt eine offene Pruefung fest. Ein scheiternder Schreibvorgang — voller
- * oder gesperrter Speicher — darf die Prüfung nicht abbrechen.
+ * Schreibt eine Pruefung fest — unabhaengig davon, ob sie noch laeuft oder
+ * bereits abgeschlossen ist: Auch ein Ergebnis soll ein Neuladen ueberleben
+ * (Issue #30). Ein scheiternder Schreibvorgang — voller oder gesperrter
+ * Speicher — darf die Prüfung nicht abbrechen.
  * @param {Speicher} speicher
  * @param {Pruefungsstand} stand
  */
@@ -88,7 +90,8 @@ export function schreibeOffenePruefung(speicher, stand) {
 }
 
 /**
- * Verwirft eine offene Pruefung — weil sie abgeschlossen oder abgebrochen wurde.
+ * Verwirft eine gespeicherte Pruefung — laufend oder bereits abgeschlossen —,
+ * weil sie ausdruecklich abgebrochen wurde oder einer neuen weicht.
  * @param {Speicher} speicher
  */
 export function verwirfOffenePruefung(speicher) {

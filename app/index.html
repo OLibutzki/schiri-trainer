@@ -62,7 +62,10 @@
 
           <form id="antwort-formular">
             <ul class="optionen" id="optionen"></ul>
-            <p class="hinweis">Mehrfachauswahl möglich. Am Desktop: Zifferntasten wählen, Eingabetaste bestätigt.</p>
+            <p class="hinweis">
+              Mehrfachauswahl möglich.
+              <span class="hinweis-tastatur">Am Desktop: Zifferntasten wählen, Eingabetaste bestätigt.</span>
+            </p>
             <button class="schaltflaeche schaltflaeche--haupt" type="submit" id="abgeben">
               Antwort abgeben
             </button>
@@ -114,15 +117,18 @@
 
             <form id="pruefung-formular">
               <ul class="optionen" id="pruefung-optionen"></ul>
-              <p class="hinweis">Mehrfachauswahl möglich. Am Desktop: Zifferntasten wählen, Eingabetaste bestätigt.</p>
+              <p class="hinweis">
+                Mehrfachauswahl möglich.
+                <span class="hinweis-tastatur">Am Desktop: Zifferntasten wählen, Eingabetaste bestätigt.</span>
+              </p>
               <button class="schaltflaeche schaltflaeche--haupt" type="submit" id="pruefung-abgeben">
                 Antwort abgeben
               </button>
             </form>
           </section>
 
-          <section id="pruefung-abbrechen-abschnitt">
-            <button class="schaltflaeche schaltflaeche--gefahr" type="button" id="pruefung-abbrechen" hidden>
+          <section id="pruefung-abbrechen-abschnitt" hidden>
+            <button class="schaltflaeche schaltflaeche--gefahr schaltflaeche--text" type="button" id="pruefung-abbrechen">
               Prüfung abbrechen
             </button>
           </section>
