@@ -239,6 +239,36 @@ test('beantworte liefert die Bewertung der Antwort', () => {
   assert.deepEqual(bewertung.zuUnrecht, ['b']);
 });
 
+test('beantworte meldet "gewonnen", wenn eine Frage dadurch gemeistert wird', () => {
+  const { katalog, engine } = engineMit();
+  const frage = katalog.fragen[0];
+  for (let i = 1; i < LERN_KONSTANTEN.MEISTER_SCHWELLE; i += 1) {
+    assert.equal(engine.beantworte(frage, ['a']).meisterungswechsel, 'unveraendert');
+  }
+  assert.equal(engine.beantworte(frage, ['a']).meisterungswechsel, 'gewonnen');
+});
+
+test('beantworte meldet "verloren", wenn eine gemeisterte Frage die Meisterung verliert', () => {
+  const { katalog, engine } = engineMit();
+  const frage = katalog.fragen[0];
+  for (let i = 0; i < LERN_KONSTANTEN.MEISTER_SCHWELLE; i += 1) engine.beantworte(frage, ['a']);
+  assert.equal(engine.istGemeistert(frage.id), true);
+  assert.equal(engine.beantworte(frage, ['b']).meisterungswechsel, 'verloren');
+});
+
+test('beantworte meldet "unveraendert" bei einer richtigen Antwort ohne Zustandswechsel', () => {
+  const { katalog, engine } = engineMit();
+  const frage = katalog.fragen[0];
+  assert.equal(engine.beantworte(frage, ['a']).meisterungswechsel, 'unveraendert');
+});
+
+test('beantworte meldet "unveraendert" bei einer falschen Antwort auf eine nicht gemeisterte Frage', () => {
+  const { katalog, engine } = engineMit();
+  const frage = katalog.fragen[0];
+  assert.equal(engine.beantworte(frage, ['b']).meisterungswechsel, 'unveraendert');
+  assert.equal(engine.istGemeistert(frage.id), false);
+});
+
 test('der Lernfortschritt wird je Fragenkennung gespeichert und ueberlebt einen Neustart', () => {
   const speicher = arbeitsspeicher();
   const { katalog, engine } = engineMit({ speicher });

@@ -39,6 +39,20 @@ const UNBERUEHRT = Object.freeze({ folge: 0, falsch: 0, zuletzt: null });
  */
 
 /**
+ * Der Wechsel des Gemeistert-Zustands einer Frage durch eine Antwort:
+ * `gewonnen`, wenn sie dadurch erstmals gemeistert ist, `verloren`, wenn eine
+ * zuvor gemeisterte Frage die Meisterung dadurch verliert, sonst
+ * `unveraendert`. Die Engine hat den vorherigen Stand ohnehin zur Hand, die
+ * Oberflaeche soll ihn nicht durch zwei Abfragen um den Auswertungsaufruf
+ * herum selbst rekonstruieren muessen.
+ * @typedef {'gewonnen' | 'verloren' | 'unveraendert'} Meisterungswechsel
+ */
+
+/**
+ * @typedef {Bewertung & { meisterungswechsel: Meisterungswechsel }} Antwortergebnis
+ */
+
+/**
  * @typedef {Lernfortschritt & { id: string, name: string }} LernfortschrittTeil
  */
 
@@ -203,11 +217,12 @@ export function erzeugeLernEngine({ katalog, speicher, uhr = Date.now, zufall = 
    * Wertet eine Antwort aus und schreibt den Lernfortschritt fort.
    * @param {Frage} frage
    * @param {Iterable<string>} gewaehlteBuchstaben
-   * @returns {Bewertung}
+   * @returns {Antwortergebnis}
    */
   function beantworte(frage, gewaehlteBuchstaben) {
     const bewertung = bewerteAntwort(frage, gewaehlteBuchstaben);
     const bisher = eintrag(frage.id);
+    const warGemeistert = istGemeistert(frage.id);
     eintraege = {
       ...eintraege,
       [frage.id]: {
@@ -217,7 +232,14 @@ export function erzeugeLernEngine({ katalog, speicher, uhr = Date.now, zufall = 
       },
     };
     schreibeLernstand(speicher, eintraege);
-    return bewertung;
+
+    const istGemeistertJetzt = istGemeistert(frage.id);
+    /** @type {Meisterungswechsel} */
+    let meisterungswechsel = 'unveraendert';
+    if (istGemeistertJetzt && !warGemeistert) meisterungswechsel = 'gewonnen';
+    else if (!istGemeistertJetzt && warGemeistert) meisterungswechsel = 'verloren';
+
+    return { ...bewertung, meisterungswechsel };
   }
 
   /**

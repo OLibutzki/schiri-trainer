@@ -2,7 +2,7 @@
 /** @import { Ansicht } from './routing.js' */
 /** @import { Bewertung } from './antwort.js' */
 /** @import { Katalog } from './typen.js' */
-/** @import { LernfortschrittTeil, Eingrenzung } from './lernengine.js' */
+/** @import { LernfortschrittTeil, Eingrenzung, Meisterungswechsel } from './lernengine.js' */
 /** @import { Pruefungsstand } from './pruefung.js' */
 import { ladeKatalog, bezeichneFrage } from './katalog.js';
 import { mische } from './mischen.js';
@@ -572,7 +572,7 @@ function werteAus() {
   anzeige.rueckmeldung.classList.add(bewertung.richtig ? 'rueckmeldung--richtig' : 'rueckmeldung--falsch');
   anzeige.rueckmeldung.hidden = false;
   anzeige.weiter.focus();
-  zeichneKopf();
+  zeichneKopf(bewertung.meisterungswechsel);
 }
 
 /**
@@ -655,13 +655,40 @@ const ZEICHNER = {
 /** Die aktuell angezeigte Ansicht; massgeblich fuer die Aktivmarkierung des Kopfbalkens. */
 let aktuelleAnsicht = /** @type {Ansicht} */ ('ueben');
 
+/** Laufendes Aufleuchten der Kopfbalkenzeile, damit ein erneutes es abbrechen kann. */
+let kopfAufleuchtenAblauf = /** @type {ReturnType<typeof setTimeout> | undefined} */ (undefined);
+
+const KOPF_AUFLEUCHTEN_KLASSEN = ['kopf-lernfortschritt--aufleuchten-gewonnen', 'kopf-lernfortschritt--aufleuchten-verloren'];
+
+/**
+ * Laesst die Kopfbalkenzeile kurz gruen (gewonnen) oder rot (verloren)
+ * aufleuchten. Bei reduzierter Bewegung entfaellt die Animation per CSS,
+ * die Farbe bleibt aber ueber dieselbe Zeitspanne statisch stehen (siehe
+ * styles.css).
+ * @param {'gewonnen' | 'verloren'} wechsel
+ */
+function leuchteKopfAuf(wechsel) {
+  clearTimeout(kopfAufleuchtenAblauf);
+  anzeige.kopfLernfortschritt.classList.remove(...KOPF_AUFLEUCHTEN_KLASSEN);
+  // Reflow erzwingen: Ein knapp aufeinanderfolgendes erneutes Aufleuchten soll
+  // die Animation neu starten statt die laufende unveraendert fortzusetzen.
+  void anzeige.kopfLernfortschritt.offsetWidth;
+  const klasse = `kopf-lernfortschritt--aufleuchten-${wechsel}`;
+  anzeige.kopfLernfortschritt.classList.add(klasse);
+  kopfAufleuchtenAblauf = setTimeout(() => {
+    anzeige.kopfLernfortschritt.classList.remove(klasse);
+  }, 900);
+}
+
 /**
  * Zeichnet den Kopfbalken (Lernfortschritt als Verweis zur Lernfortschritt-
  * Ansicht) und die Markierung am Navigationseintrag „Prüfung" neu. Laeuft
  * losgeloest von einem Ansichtswechsel ueberall dort, wo sich Lernfortschritt
  * oder Pruefungsstand aendern koennen (siehe Aufrufstellen).
+ * @param {Meisterungswechsel | null} [meisterungswechsel] Loest ausserhalb von
+ *   `unveraendert`/`null` ein Aufleuchten der Zeile aus (siehe `leuchteKopfAuf`).
  */
-function zeichneKopf() {
+function zeichneKopf(meisterungswechsel = null) {
   const { anteil } = engine.lernfortschritt();
   anzeige.kopfBalken.value = anteil;
   anzeige.kopfAnteil.textContent = alsProzent(anteil);
@@ -678,6 +705,8 @@ function zeichneKopf() {
   // Waehrend des Ergebnis-Bildschirms ist der Stand noch nicht null (das
   // erledigt erst "Neue Prüfung"), gilt aber nicht mehr als "offen".
   anzeige.pruefungOffenMarkierung.hidden = pruefungsstand === null || istAbgeschlossen(pruefungsstand);
+
+  if (meisterungswechsel === 'gewonnen' || meisterungswechsel === 'verloren') leuchteKopfAuf(meisterungswechsel);
 }
 
 /** @param {Ansicht} ansicht */

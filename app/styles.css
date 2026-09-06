@@ -126,6 +126,61 @@ body {
   color: var(--akzent);
 }
 
+/* Meistert eine Antwort eine Frage oder verliert sie ihre Meisterung, waechst
+   bzw. schrumpft der Balken sichtbar und die Zeile leuchtet kurz auf (Issue
+   #26). Die Farbe steht unabhaengig von reduzierter Bewegung immer statisch,
+   die Animation kommt erst per @media hinzu, damit "weniger Bewegung" nicht
+   "weniger Information" bedeutet. */
+.kopf-lernfortschritt--aufleuchten-gewonnen {
+  border-color: var(--richtig);
+  background: var(--richtig-grund);
+}
+
+.kopf-lernfortschritt--aufleuchten-verloren {
+  border-color: var(--falsch);
+  background: var(--falsch-grund);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .kopf-lernfortschritt .lernfortschritt-balken::-webkit-progress-value {
+    transition: width 0.4s ease;
+  }
+
+  .kopf-lernfortschritt .lernfortschritt-balken::-moz-progress-bar {
+    transition: width 0.4s ease;
+  }
+
+  .kopf-lernfortschritt--aufleuchten-gewonnen {
+    animation: kopf-lernfortschritt-aufleuchten-gewonnen 0.9s ease-out forwards;
+  }
+
+  .kopf-lernfortschritt--aufleuchten-verloren {
+    animation: kopf-lernfortschritt-aufleuchten-verloren 0.9s ease-out forwards;
+  }
+
+  @keyframes kopf-lernfortschritt-aufleuchten-gewonnen {
+    from {
+      border-color: var(--richtig);
+      background: var(--richtig-grund);
+    }
+    to {
+      border-color: var(--rand);
+      background: var(--flaeche);
+    }
+  }
+
+  @keyframes kopf-lernfortschritt-aufleuchten-verloren {
+    from {
+      border-color: var(--falsch);
+      background: var(--falsch-grund);
+    }
+    to {
+      border-color: var(--rand);
+      background: var(--flaeche);
+    }
+  }
+}
+
 .ist-nur-screenreader {
   position: absolute;
   width: 1px;
