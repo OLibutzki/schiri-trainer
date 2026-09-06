@@ -1,0 +1,15 @@
+{
+  "name": "Schiri-Trainer",
+  "short_name": "Schiri-Trainer",
+  "description": "Übungs- und Prüfungstrainer für den DHB-Regelfragenkatalog Basiswissen.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f7f8",
+  "theme_color": "#1f5fa8",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
