@@ -1,5 +1,4 @@
-// Pruefungsansicht im Browser. Wie in `uebung.test.mjs` halten die mit `todo`
-// markierten Tests die Abnahmekriterien offener Issues fest.
+// Pruefungsansicht im Browser.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { starteUmgebung, oeffne, masse, MOBIL, DESKTOP } from './umgebung.mjs';

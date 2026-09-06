@@ -247,7 +247,15 @@ function beschreibeEingrenzung(eingrenzung) {
       .map((id) => findeLektion(katalog, id)?.nummer)
       .filter((nummer) => nummer !== undefined)
       .sort((a, b) => a - b);
-    text = nummern.length === 1 ? `Lektion ${nummern[0]}` : `Lektionen ${nummern.join(', ')}`;
+    // Faellt auf die Anzahl zurueck, falls sich nicht jede Id im aktuell
+    // geladenen Katalog aufloesen liess: Besser eine ungenaue Zahl als eine
+    // luckenhafte oder leere Aufzaehlung.
+    text =
+      nummern.length !== eingrenzung.lektionen.length
+        ? `${eingrenzung.lektionen.length} Lektionen`
+        : nummern.length === 1
+          ? `Lektion ${nummern[0]}`
+          : `Lektionen ${nummern.join(', ')}`;
   } else {
     // Ab vier Lektionen faellt es auf die Anzahl zurueck: Bei vielen
     // angehakten Lektionen (typisch, da der Baum mit allen angehakten
@@ -433,6 +441,18 @@ function fuellePruefungsWissensstufen() {
 }
 
 /**
+ * Zeigt einen optionalen Text an oder blendet das Element aus, wenn er fehlt
+ * (`null`). Gemeinsame Konvention fuer Zusatzzeilen, die nur erscheinen, wenn
+ * es etwas zu nennen gibt (siehe Aufrufstellen).
+ * @param {HTMLElement} element
+ * @param {string | null} text
+ */
+function zeigeOptionalenText(element, text) {
+  element.textContent = text ?? '';
+  element.hidden = text === null;
+}
+
+/**
  * Zeichnet die aktuell offene Frage der laufenden Pruefung neu. Nur wenn sie
  * sich gegenueber der zuletzt gezeichneten unterscheidet: Sonst wuerde ein
  * Ansichtswechsel eine angekreuzte, aber nicht abgegebene Auswahl verwerfen
@@ -445,9 +465,7 @@ function zeigePruefungsfrage() {
   anzeige.pruefungFortschritt.textContent = `Frage ${index + 1} von ${pruefungsstand.frageIds.length}`;
   // Nennt die eigene Eingrenzung der Pruefung, statt sie zu verschweigen
   // (Issue #34); bleibt verborgen, wenn die Pruefung ueber den ganzen Katalog laeuft.
-  const eingrenzung = beschreibePruefungsEingrenzung(katalog, pruefungsstand);
-  anzeige.pruefungEingrenzung.textContent = eingrenzung ?? '';
-  anzeige.pruefungEingrenzung.hidden = eingrenzung === null;
+  zeigeOptionalenText(anzeige.pruefungEingrenzung, beschreibePruefungsEingrenzung(katalog, pruefungsstand));
   if (frageId === pruefungAngezeigteFrage) return;
 
   const frage = /** @type {Frage} */ (katalog.fragen.find((kandidat) => kandidat.id === frageId));
@@ -484,9 +502,7 @@ function zeichnePruefung() {
   anzeige.pruefungAbbrechenAbschnitt.hidden = true;
   anzeige.pruefungErgebnis.hidden = false;
 
-  const eingrenzung = beschreibePruefungsEingrenzung(katalog, pruefungsstand);
-  anzeige.pruefungErgebnisEingrenzung.textContent = eingrenzung ?? '';
-  anzeige.pruefungErgebnisEingrenzung.hidden = eingrenzung === null;
+  zeigeOptionalenText(anzeige.pruefungErgebnisEingrenzung, beschreibePruefungsEingrenzung(katalog, pruefungsstand));
 
   const auswertung = auswertePruefung(katalog, pruefungsstand);
   anzeige.pruefungPunktzahl.textContent = `${auswertung.punktzahl} von ${auswertung.gesamt} Fragen richtig beantwortet.`;
@@ -687,17 +703,26 @@ function zeichneLernfortschritt() {
 }
 
 /**
- * Wechselt in den Uebungsmodus mit exakt der uebergebenen Problemfrage. Die
- * Eingrenzung wie bei "Problemfragen üben" (nur Problemfragen, keine
- * Lektionen-Einschraenkung) stellt sicher, dass die Frage zugelassen bleibt
- * und `ZEICHNER.ueben` sie nicht sofort durch eine andere ersetzt.
- * @param {Frage} frage
+ * Grenzt auf "Nur Problemfragen" ein, ohne Lektionen-Einschraenkung: der Baum
+ * zeigt das als "alles angehakt". Gemeinsame Grundlage von "Problemfragen
+ * üben" und dem gezielten Wechsel zu einer einzelnen Problemfrage.
  */
-function uebeProblemfrage(frage) {
+function aktiviereNurProblemfragenEingrenzung() {
   engine.setzeEingrenzung({ lektionen: null, nurProblemfragen: true });
   baumAuswahl = alleLektionIds(katalog);
   anzeige.eingrenzungProblemfragen.checked = true;
   renderEingrenzungsBaum();
+}
+
+/**
+ * Wechselt in den Uebungsmodus mit exakt der uebergebenen Problemfrage. Die
+ * Eingrenzung wie bei "Problemfragen üben" stellt sicher, dass die Frage
+ * zugelassen bleibt und `ZEICHNER.ueben` sie nicht sofort durch eine andere
+ * ersetzt.
+ * @param {Frage} frage
+ */
+function uebeProblemfrage(frage) {
+  aktiviereNurProblemfragenEingrenzung();
   zeigeFrage(frage);
   window.location.hash = '#/ueben';
 }
@@ -967,11 +992,7 @@ anzeige.eingrenzungBaum.addEventListener('click', (ereignis) => {
 });
 
 anzeige.problemfragenUeben.addEventListener('click', () => {
-  engine.setzeEingrenzung({ lektionen: null, nurProblemfragen: true });
-  // Keine Lektionen-Einschraenkung: der Baum zeigt das als "alles angehakt".
-  baumAuswahl = alleLektionIds(katalog);
-  anzeige.eingrenzungProblemfragen.checked = true;
-  renderEingrenzungsBaum();
+  aktiviereNurProblemfragenEingrenzung();
   window.location.hash = '#/ueben';
 });
 
