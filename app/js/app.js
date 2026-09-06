@@ -759,3 +759,16 @@ try {
   anzeige.navigation.hidden = true;
   console.error(fehler);
 }
+
+// Registrierung relativ zum Dokument (nicht zu diesem Modul unter js/), damit
+// der Geltungsbereich der gesamte Ordner ist, unter dem "app/" ausgeliefert
+// wird — unabhaengig vom Projektpfad auf GitHub Pages. Unabhaengig vom
+// Katalog-Ladeversuch oben: Offline-Faehigkeit soll auch bestehen bleiben,
+// wenn der erste Ladeversuch fehlschlaegt.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch((fehler) => {
+      console.warn('Service Worker konnte nicht registriert werden.', fehler);
+    });
+  });
+}
