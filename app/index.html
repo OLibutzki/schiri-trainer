@@ -36,6 +36,31 @@
         </section>
 
         <section id="ansicht-ueben" class="ansicht" hidden>
+          <section class="eingrenzung" id="eingrenzung-aktiv" hidden>
+            <p id="eingrenzung-beschreibung"></p>
+            <button class="schaltflaeche" type="button" id="eingrenzung-aufheben">Eingrenzung aufheben</button>
+          </section>
+
+          <details class="eingrenzung-auswahl" id="eingrenzung-auswahl">
+            <summary>Übungslauf eingrenzen</summary>
+
+            <div class="eingrenzung-feld">
+              <label for="eingrenzung-wissensstufe">Wissensstufe</label>
+              <select id="eingrenzung-wissensstufe">
+                <option value="">Alle</option>
+              </select>
+            </div>
+
+            <div class="eingrenzung-feld">
+              <p id="eingrenzung-lektionen-label">Lektionen</p>
+              <ul class="eingrenzung-lektionen" id="eingrenzung-lektionen" aria-labelledby="eingrenzung-lektionen-label"></ul>
+            </div>
+
+            <button class="schaltflaeche schaltflaeche--haupt" type="button" id="eingrenzung-uebernehmen">
+              Eingrenzung übernehmen
+            </button>
+          </details>
+
           <p class="frage-kennung" id="frage-kennung"></p>
           <h2 class="frage-text" id="frage-text"></h2>
 
@@ -54,7 +79,7 @@
             </button>
           </section>
 
-          <p class="meldung" id="keine-frage" hidden>Der Katalog enthält keine Frage zum Üben.</p>
+          <p class="meldung" id="keine-frage" hidden></p>
         </section>
 
         <section id="ansicht-pruefung" class="ansicht" hidden>
@@ -111,7 +136,7 @@
             <h2>Ergebnis</h2>
             <p class="lernfortschritt-erlaeuterung" id="pruefung-punktzahl"></p>
 
-            <h3>Falsch beantwortete Fragen</h3>
+            <h3 id="pruefung-falsche-titel">Falsch beantwortete Fragen</h3>
             <p id="pruefung-alle-richtig" hidden>Alle Fragen wurden richtig beantwortet.</p>
             <ul class="pruefung-falsche" id="pruefung-falsche"></ul>
 
@@ -135,6 +160,7 @@
 
           <h3>Problemfragen</h3>
           <p id="problemfragen-leer" hidden>Zurzeit gibt es keine Problemfragen.</p>
+          <button class="schaltflaeche" type="button" id="problemfragen-ueben" hidden>Problemfragen üben</button>
           <ul class="problemfragen" id="problemfragen"></ul>
 
           <div class="schaltflaechen">

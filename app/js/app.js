@@ -1,10 +1,10 @@
-/** @import { Frage } from './typen.js' */
+/** @import { Frage, Option } from './typen.js' */
 /** @import { Ansicht } from './routing.js' */
 /** @import { Bewertung } from './antwort.js' */
 /** @import { Katalog } from './typen.js' */
-/** @import { LernfortschrittTeil } from './lernengine.js' */
+/** @import { LernfortschrittTeil, Eingrenzung } from './lernengine.js' */
 /** @import { Pruefungsstand } from './pruefung.js' */
-import { ladeKatalog, bezeichneFrage } from './katalog.js';
+import { ladeKatalog, bezeichneFrage, findeLektion, findeWissensstufe } from './katalog.js';
 import { mische } from './mischen.js';
 import { erzeugeLernEngine } from './lernengine.js';
 import { browserSpeicher } from './lernstand.js';
@@ -54,6 +54,14 @@ const anzeige = {
   weiter: element('weiter'),
   keineFrage: element('keine-frage'),
 
+  eingrenzungAktiv: element('eingrenzung-aktiv'),
+  eingrenzungBeschreibung: element('eingrenzung-beschreibung'),
+  eingrenzungAufheben: /** @type {HTMLButtonElement} */ (element('eingrenzung-aufheben')),
+  eingrenzungAuswahl: /** @type {HTMLDetailsElement} */ (element('eingrenzung-auswahl')),
+  eingrenzungWissensstufe: /** @type {HTMLSelectElement} */ (element('eingrenzung-wissensstufe')),
+  eingrenzungLektionen: element('eingrenzung-lektionen'),
+  eingrenzungUebernehmen: /** @type {HTMLButtonElement} */ (element('eingrenzung-uebernehmen')),
+
   pruefungEinrichtung: element('pruefung-einrichtung'),
   pruefungFragenzahl: /** @type {HTMLSelectElement} */ (element('pruefung-fragenzahl')),
   pruefungWissensstufeFeld: element('pruefung-wissensstufe-feld'),
@@ -71,6 +79,7 @@ const anzeige = {
   pruefungErgebnis: element('pruefung-ergebnis'),
   pruefungPunktzahl: element('pruefung-punktzahl'),
   pruefungAlleRichtig: element('pruefung-alle-richtig'),
+  pruefungFalscheTitel: element('pruefung-falsche-titel'),
   pruefungFalsche: element('pruefung-falsche'),
   pruefungNeu: /** @type {HTMLButtonElement} */ (element('pruefung-neu')),
 
@@ -79,6 +88,7 @@ const anzeige = {
   lernfortschrittLektionen: element('lernfortschritt-lektionen'),
   problemfragen: element('problemfragen'),
   problemfragenLeer: element('problemfragen-leer'),
+  problemfragenUeben: /** @type {HTMLButtonElement} */ (element('problemfragen-ueben')),
   zuruecksetzen: /** @type {HTMLButtonElement} */ (element('zuruecksetzen')),
 };
 
@@ -119,40 +129,54 @@ function kaestchen() {
 }
 
 /**
- * Baut die Optionenliste einer Frage. Die Reihenfolge wechselt bei jeder
- * Anzeige, damit sich der Anwender den Inhalt merkt. Der Buchstabe ist nur
- * intern die Kennung einer Option (Formatdetail, siehe docs/katalogformat.md)
- * und wird nicht angezeigt.
- * @param {Frage} frage
- * @returns {HTMLLIElement[]}
+ * Baut eine einzelne Optionszeile: Kaestchen plus Text, ohne Zustand. Der
+ * Buchstabe ist nur intern die Kennung einer Option (Formatdetail, siehe
+ * docs/katalogformat.md) und wird nicht angezeigt. Eine uebergebene Position
+ * erscheint als kleine Zifferntaste (Uebungs-/Pruefungsoptionen); ohne
+ * Position entfaellt sie (Rueckblick auf eine bereits beantwortete Frage).
+ * @param {Option} option
+ * @param {number | null} [position]
+ * @returns {HTMLLIElement}
  */
-function baueOptionenListe(frage) {
-  return mische(frage.optionen).map((option, index) => {
-    const eintrag = document.createElement('li');
-    const feld = document.createElement('label');
-    feld.className = 'option';
+function baueOptionZeile(option, position = null) {
+  const eintrag = document.createElement('li');
+  const feld = document.createElement('label');
+  feld.className = 'option';
 
-    const optionskaestchen = document.createElement('input');
-    // Bewusst immer Mehrfachauswahl: Ein an die Frage angepasstes Bedienelement
-    // wuerde verraten, wie viele Optionen korrekt sind.
-    optionskaestchen.type = 'checkbox';
-    optionskaestchen.name = 'option';
-    optionskaestchen.value = option.buchstabe;
+  const optionskaestchen = document.createElement('input');
+  // Bewusst immer Mehrfachauswahl: Ein an die Frage angepasstes Bedienelement
+  // wuerde verraten, wie viele Optionen korrekt sind.
+  optionskaestchen.type = 'checkbox';
+  optionskaestchen.name = 'option';
+  optionskaestchen.value = option.buchstabe;
 
+  const text = document.createElement('span');
+  text.textContent = option.text;
+
+  if (position === null) {
+    feld.append(optionskaestchen, text);
+  } else {
     // Die Zifferntaste zeigt die Position, nicht den Original-Buchstaben: Nur
     // die Position ist am Bildschirm sichtbar mit einer Taste verknuepft.
     const taste = document.createElement('span');
     taste.className = 'option-taste';
-    taste.textContent = String(index + 1);
+    taste.textContent = String(position);
     taste.setAttribute('aria-hidden', 'true');
-
-    const text = document.createElement('span');
-    text.textContent = option.text;
-
     feld.append(optionskaestchen, taste, text);
-    eintrag.append(feld);
-    return eintrag;
-  });
+  }
+
+  eintrag.append(feld);
+  return eintrag;
+}
+
+/**
+ * Baut die Optionenliste einer Frage. Die Reihenfolge wechselt bei jeder
+ * Anzeige, damit sich der Anwender den Inhalt merkt und nicht die Position.
+ * @param {Frage} frage
+ * @returns {HTMLLIElement[]}
+ */
+function baueOptionenListe(frage) {
+  return mische(frage.optionen).map((option, index) => baueOptionZeile(option, index + 1));
 }
 
 /** @param {Frage} frage */
@@ -179,10 +203,118 @@ function zeigeNaechsteFrage() {
     anzeige.rueckmeldung.hidden = true;
     anzeige.frageKennung.textContent = '';
     anzeige.frageText.textContent = '';
+    anzeige.keineFrage.textContent = engine.eingrenzung()
+      ? 'Für diese Eingrenzung gibt es keine Frage. Eingrenzung oben aufheben, um weiterzuüben.'
+      : 'Der Katalog enthält keine Frage zum Üben.';
     anzeige.keineFrage.hidden = false;
     return;
   }
   zeigeFrage(frage);
+}
+
+/**
+ * Beschreibt eine Eingrenzung fuer die Anzeige.
+ * @param {Eingrenzung} eingrenzung
+ * @returns {string}
+ */
+function beschreibeEingrenzung(eingrenzung) {
+  switch (eingrenzung.typ) {
+    case 'wissensstufe': {
+      const stufe = findeWissensstufe(katalog, eingrenzung.id);
+      return `Eingegrenzt auf Wissensstufe „${stufe ? stufe.name : eingrenzung.id}".`;
+    }
+    case 'lektion': {
+      const titel = eingrenzung.ids.map((/** @type {string} */ id) => {
+        const lektion = findeLektion(katalog, id);
+        return lektion ? `Lektion ${lektion.nummer}: ${lektion.titel}` : id;
+      });
+      return `Eingegrenzt auf ${titel.join(', ')}.`;
+    }
+    case 'problemfragen':
+      return 'Eingegrenzt auf Problemfragen.';
+    default:
+      return '';
+  }
+}
+
+/** Zeichnet die Anzeige der aktiven Eingrenzung (oder deren Fehlen). */
+function zeichneEingrenzung() {
+  const eingrenzung = engine.eingrenzung();
+  anzeige.eingrenzungAktiv.hidden = eingrenzung === null;
+  if (eingrenzung) anzeige.eingrenzungBeschreibung.textContent = beschreibeEingrenzung(eingrenzung);
+}
+
+/** @returns {HTMLOptionElement[]} Je eine <option> pro Wissensstufe, nach Reihenfolge sortiert. */
+function baueWissensstufenOptionen() {
+  return [...katalog.metadaten.wissensstufen]
+    .sort((a, b) => a.reihenfolge - b.reihenfolge)
+    .map((stufe) => {
+      const option = document.createElement('option');
+      option.value = stufe.id;
+      option.textContent = stufe.name;
+      return option;
+    });
+}
+
+/** Fuellt Wissensstufen-Auswahl und Lektionen-Liste der Eingrenzung. */
+function fuelleEingrenzungsAuswahl() {
+  anzeige.eingrenzungWissensstufe.append(...baueWissensstufenOptionen());
+
+  anzeige.eingrenzungLektionen.replaceChildren(
+    ...katalog.metadaten.lektionen.map((lektion) => {
+      const zeile = document.createElement('li');
+      const feld = document.createElement('label');
+      const kaestchen = document.createElement('input');
+      kaestchen.type = 'checkbox';
+      kaestchen.name = 'eingrenzung-lektion';
+      kaestchen.value = lektion.id;
+      const text = document.createElement('span');
+      text.textContent = `Lektion ${lektion.nummer}: ${lektion.titel}`;
+      feld.append(kaestchen, text);
+      zeile.append(feld);
+      return zeile;
+    }),
+  );
+}
+
+/** @returns {string[]} Die Kennungen der in der Eingrenzung angehakten Lektionen. */
+function gewaehlteLektionen() {
+  return [
+    .../** @type {NodeListOf<HTMLInputElement>} */ (
+      anzeige.eingrenzungLektionen.querySelectorAll('input[type="checkbox"]:checked')
+    ),
+  ].map((kaestchen) => kaestchen.value);
+}
+
+/** Uebernimmt die in der Auswahl getroffene Eingrenzung und startet neu. */
+function uebernehmeEingrenzung() {
+  const lektionen = gewaehlteLektionen();
+  const wissensstufe = anzeige.eingrenzungWissensstufe.value;
+  /** @type {Eingrenzung | null} */
+  let neu = null;
+  // Wissensstufe und Lektionen schliessen sich gegenseitig aus (siehe die
+  // Ereignis-Handler unten, die bei Auswahl der einen die andere zuruecksetzen);
+  // Lektionen haben Vorrang, falls dennoch beides gesetzt ist.
+  if (lektionen.length > 0) neu = { typ: 'lektion', ids: lektionen };
+  else if (wissensstufe !== '') neu = { typ: 'wissensstufe', id: wissensstufe };
+
+  engine.setzeEingrenzung(neu);
+  anzeige.eingrenzungAuswahl.open = false;
+  zeichneEingrenzung();
+  zeigeNaechsteFrage();
+}
+
+/** Hebt eine aktive Eingrenzung auf und startet den Uebungslauf neu. */
+function hebeEingrenzungAuf() {
+  engine.setzeEingrenzung(null);
+  anzeige.eingrenzungWissensstufe.value = '';
+  for (const kaestchen of /** @type {NodeListOf<HTMLInputElement>} */ (
+    anzeige.eingrenzungLektionen.querySelectorAll('input[type="checkbox"]')
+  )) {
+    kaestchen.checked = false;
+  }
+  zeichneEingrenzung();
+  zeigeNaechsteFrage();
 }
 
 /** @returns {string[]} */
@@ -202,16 +334,7 @@ function fuellePruefungsWissensstufen() {
     anzeige.pruefungWissensstufeFeld.hidden = true;
     return;
   }
-  anzeige.pruefungWissensstufe.append(
-    ...[...katalog.metadaten.wissensstufen]
-      .sort((a, b) => a.reihenfolge - b.reihenfolge)
-      .map((stufe) => {
-        const option = document.createElement('option');
-        option.value = stufe.id;
-        option.textContent = stufe.name;
-        return option;
-      }),
-  );
+  anzeige.pruefungWissensstufe.append(...baueWissensstufenOptionen());
 }
 
 /**
@@ -260,6 +383,7 @@ function zeichnePruefung() {
   const auswertung = auswertePruefung(katalog, pruefungsstand);
   anzeige.pruefungPunktzahl.textContent = `${auswertung.punktzahl} von ${auswertung.gesamt} Fragen richtig beantwortet.`;
   anzeige.pruefungAlleRichtig.hidden = auswertung.falsche.length > 0;
+  anzeige.pruefungFalscheTitel.hidden = auswertung.falsche.length === 0;
   anzeige.pruefungFalsche.replaceChildren(
     ...auswertung.falsche.map(({ frage, gewaehlt, bewertung }) => {
       const zeile = document.createElement('li');
@@ -345,24 +469,7 @@ function markiereBewertung(kaestchenListe, gewaehlt, bewertung) {
 function baueOptionenRueckblick(frage, gewaehlt, bewertung) {
   const liste = document.createElement('ul');
   liste.className = 'optionen';
-  liste.append(
-    ...frage.optionen.map((option) => {
-      const eintrag = document.createElement('li');
-      const feld = document.createElement('label');
-      feld.className = 'option';
-
-      const optionskaestchen = document.createElement('input');
-      optionskaestchen.type = 'checkbox';
-      optionskaestchen.value = option.buchstabe;
-
-      const text = document.createElement('span');
-      text.textContent = option.text;
-
-      feld.append(optionskaestchen, text);
-      eintrag.append(feld);
-      return eintrag;
-    }),
-  );
+  liste.append(...frage.optionen.map((option) => baueOptionZeile(option)));
   markiereBewertung(kaestchenIn(liste), gewaehlt, bewertung);
   return liste;
 }
@@ -426,6 +533,7 @@ function zeichneLernfortschritt() {
 
   const problemfragen = engine.problemfragen();
   anzeige.problemfragenLeer.hidden = problemfragen.length > 0;
+  anzeige.problemfragenUeben.hidden = problemfragen.length === 0;
   anzeige.problemfragen.replaceChildren(
     ...problemfragen.map((frage) => {
       const zeile = document.createElement('li');
@@ -455,6 +563,7 @@ const ZEICHNER = {
   // Eine angefangene, noch nicht ausgewertete Frage ueberdauert einen
   // Ansichtswechsel; sonst wuerde ein Blick auf den Lernfortschritt sie verwerfen.
   ueben: () => {
+    zeichneEingrenzung();
     if (aktuelleFrage === null || beantwortet) zeigeNaechsteFrage();
   },
   // Eine laufende oder abgeschlossene Pruefung ueberdauert ebenfalls einen
@@ -564,6 +673,31 @@ anzeige.weiter.addEventListener('click', () => {
   window.scrollTo({ top: 0 });
 });
 
+anzeige.eingrenzungUebernehmen.addEventListener('click', uebernehmeEingrenzung);
+anzeige.eingrenzungAufheben.addEventListener('click', hebeEingrenzungAuf);
+
+// Wissensstufe und Lektionen schliessen sich gegenseitig aus: Die Auswahl der
+// einen setzt die andere zurueck, damit die Anzeige nie beide gleichzeitig
+// gewaehlt zeigt, obwohl nur eine davon uebernommen wuerde.
+anzeige.eingrenzungWissensstufe.addEventListener('change', () => {
+  if (anzeige.eingrenzungWissensstufe.value === '') return;
+  for (const kaestchen of /** @type {NodeListOf<HTMLInputElement>} */ (
+    anzeige.eingrenzungLektionen.querySelectorAll('input[type="checkbox"]')
+  )) {
+    kaestchen.checked = false;
+  }
+});
+
+anzeige.eingrenzungLektionen.addEventListener('change', (ereignis) => {
+  if (!(/** @type {HTMLInputElement} */ (ereignis.target).checked)) return;
+  anzeige.eingrenzungWissensstufe.value = '';
+});
+
+anzeige.problemfragenUeben.addEventListener('click', () => {
+  engine.setzeEingrenzung({ typ: 'problemfragen' });
+  window.location.hash = '#/ueben';
+});
+
 anzeige.pruefungStarten.addEventListener('click', startePruefung);
 
 anzeige.pruefungFormular.addEventListener('submit', (ereignis) => {
@@ -599,6 +733,7 @@ try {
   katalog = await ladeKatalog();
   engine = erzeugeLernEngine({ katalog, speicher: browserSpeicher() });
   zeigeHerkunft();
+  fuelleEingrenzungsAuswahl();
   fuellePruefungsWissensstufen();
   if (engine.lernstandVerworfen) {
     anzeige.lernstandhinweis.textContent =
