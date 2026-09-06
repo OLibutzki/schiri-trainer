@@ -1,0 +1,14 @@
+<!-- Maskable: Hintergrund fuellt die gesamte Flaeche randlos, Inhalt bleibt
+     innerhalb der inneren 80 % (der Sicherheitszone maskierbarer Icons). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#1f5fa8" />
+  <text
+    x="256"
+    y="320"
+    font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+    font-size="216"
+    font-weight="700"
+    fill="#ffffff"
+    text-anchor="middle"
+  >S</text>
+</svg>
