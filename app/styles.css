@@ -379,10 +379,8 @@ body {
   border-radius: 0.5rem;
 }
 
-.pruefung-falsche p {
+.pruefung-falsche .optionen {
   margin: 0.5rem 0 0;
-  font-size: 0.875rem;
-  color: var(--schrift-leise);
 }
 
 .fuss {

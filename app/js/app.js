@@ -64,6 +64,7 @@ const anzeige = {
 
   pruefungEinrichtung: element('pruefung-einrichtung'),
   pruefungFragenzahl: /** @type {HTMLSelectElement} */ (element('pruefung-fragenzahl')),
+  pruefungWissensstufeFeld: element('pruefung-wissensstufe-feld'),
   pruefungWissensstufe: /** @type {HTMLSelectElement} */ (element('pruefung-wissensstufe')),
   pruefungStarten: /** @type {HTMLButtonElement} */ (element('pruefung-starten')),
 
@@ -197,8 +198,16 @@ function gewaehlteBuchstaben() {
     .map((feld) => feld.value);
 }
 
-/** Fuellt die Wissensstufen-Auswahl der Pruefungseinrichtung. */
+/**
+ * Fuellt die Wissensstufen-Auswahl der Pruefungseinrichtung. Gibt es nur eine
+ * Wissensstufe, entfaellt die Auswahl: Sie waere ohne Wirkung, da "Alle" und
+ * "die eine Wissensstufe" dieselbe Kandidatenmenge waeren.
+ */
 function fuellePruefungsWissensstufen() {
+  if (katalog.metadaten.wissensstufen.length <= 1) {
+    anzeige.pruefungWissensstufeFeld.hidden = true;
+    return;
+  }
   anzeige.pruefungWissensstufe.append(
     ...[...katalog.metadaten.wissensstufen]
       .sort((a, b) => a.reihenfolge - b.reihenfolge)
@@ -269,14 +278,7 @@ function zeichnePruefung() {
       text.className = 'problemfrage-text';
       text.textContent = frage.text;
 
-      const gegeben = document.createElement('p');
-      gegeben.textContent =
-        gewaehlt.length > 0 ? `Gegeben: ${gewaehlt.map((b) => `${b})`).join(', ')}.` : 'Keine Antwort gegeben.';
-
-      const korrekt = document.createElement('p');
-      korrekt.textContent = `Korrekt: ${bewertung.korrekt.map((b) => `${b})`).join(', ')}.`;
-
-      zeile.append(kennung, text, gegeben, korrekt);
+      zeile.append(kennung, text, baueOptionenRueckblick(frage, gewaehlt, bewertung));
       return zeile;
     }),
   );
@@ -316,15 +318,20 @@ function werteAusPruefung() {
   window.scrollTo({ top: 0 });
 }
 
-function werteAus() {
-  if (!aktuelleFrage || beantwortet) return;
-  const gewaehlt = gewaehlteBuchstaben();
-  const bewertung = engine.beantworte(aktuelleFrage, gewaehlt);
-  beantwortet = true;
+/**
+ * Markiert Kaestchen als korrekt, zu Unrecht angekreuzt oder uebersehen —
+ * die gemeinsame Darstellung fuer die Rueckmeldung im Uebungsmodus und den
+ * Rueckblick auf falsch beantwortete Pruefungsfragen.
+ * @param {HTMLInputElement[]} kaestchenListe
+ * @param {string[]} gewaehlt
+ * @param {Bewertung} bewertung
+ */
+function markiereBewertung(kaestchenListe, gewaehlt, bewertung) {
   const gewaehltMenge = new Set(gewaehlt);
   const korrektMenge = new Set(bewertung.korrekt);
 
-  for (const optionskaestchen of kaestchen()) {
+  for (const optionskaestchen of kaestchenListe) {
+    optionskaestchen.checked = gewaehltMenge.has(optionskaestchen.value);
     optionskaestchen.disabled = true;
     const feld = /** @type {HTMLElement} */ (optionskaestchen.closest('.option'));
     const buchstabe = optionskaestchen.value;
@@ -341,6 +348,55 @@ function werteAus() {
       feld.append(vermerk);
     }
   }
+}
+
+/**
+ * Baut die Optionenliste einer bereits ausgewerteten Pruefungsfrage im
+ * Rueckblick: gleiche Darstellung wie die Rueckmeldung im Uebungsmodus,
+ * aber unveraenderlich. Anders als beim aktiven Ueben gibt es hier nichts
+ * zu merken, das eine gemischte Reihenfolge verhindern muesste — und da der
+ * Rueckblick bei jedem Ansichtswechsel neu gezeichnet wird, wuerde eine
+ * Mischung sonst bei jedem Wechsel die Reihenfolge aendern.
+ * @param {Frage} frage
+ * @param {string[]} gewaehlt
+ * @param {Bewertung} bewertung
+ * @returns {HTMLUListElement}
+ */
+function baueOptionenRueckblick(frage, gewaehlt, bewertung) {
+  const liste = document.createElement('ul');
+  liste.className = 'optionen';
+  liste.append(
+    ...frage.optionen.map((option) => {
+      const eintrag = document.createElement('li');
+      const feld = document.createElement('label');
+      feld.className = 'option';
+
+      const optionskaestchen = document.createElement('input');
+      optionskaestchen.type = 'checkbox';
+      optionskaestchen.value = option.buchstabe;
+
+      const buchstabe = document.createElement('span');
+      buchstabe.className = 'option-buchstabe';
+      buchstabe.textContent = `${option.buchstabe})`;
+
+      const text = document.createElement('span');
+      text.textContent = option.text;
+
+      feld.append(optionskaestchen, buchstabe, text);
+      eintrag.append(feld);
+      return eintrag;
+    }),
+  );
+  markiereBewertung(kaestchenIn(liste), gewaehlt, bewertung);
+  return liste;
+}
+
+function werteAus() {
+  if (!aktuelleFrage || beantwortet) return;
+  const gewaehlt = gewaehlteBuchstaben();
+  const bewertung = engine.beantworte(aktuelleFrage, gewaehlt);
+  beantwortet = true;
+  markiereBewertung(kaestchen(), gewaehlt, bewertung);
 
   anzeige.abgeben.disabled = true;
   anzeige.urteil.textContent = bewertung.richtig ? 'Richtig' : 'Falsch';
