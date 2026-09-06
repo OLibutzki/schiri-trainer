@@ -380,6 +380,21 @@ test('das Aufheben einer Eingrenzung gibt wieder den gesamten Katalog frei', () 
   assert.ok(gesehen.has('basiswissen-3') || gesehen.has('basiswissen-4'));
 });
 
+test('istZugelassen meldet, ob eine Frage innerhalb der aktuellen Eingrenzung liegt', () => {
+  const { engine } = engineMit({ fragen: 4 });
+  engine.setzeEingrenzung({ wissensstufen: [], lektionen: ['basiswissen-1'], nurProblemfragen: false });
+  assert.equal(engine.istZugelassen('basiswissen-1'), true);
+  assert.equal(engine.istZugelassen('basiswissen-2'), true);
+  assert.equal(engine.istZugelassen('basiswissen-3'), false);
+});
+
+test('istZugelassen folgt einer geaenderten Eingrenzung sofort', () => {
+  const { engine } = engineMit({ fragen: 4 });
+  assert.equal(engine.istZugelassen('basiswissen-3'), true);
+  engine.setzeEingrenzung({ wissensstufen: [], lektionen: ['basiswissen-1'], nurProblemfragen: false });
+  assert.equal(engine.istZugelassen('basiswissen-3'), false);
+});
+
 test('Zuruecksetzen loescht den Lernfortschritt dauerhaft', () => {
   const speicher = arbeitsspeicher();
   const { katalog, engine } = engineMit({ speicher });

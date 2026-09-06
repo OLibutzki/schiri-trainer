@@ -162,6 +162,18 @@ export function erzeugeLernEngine({ katalog, speicher, uhr = Date.now, zufall = 
   }
 
   /**
+   * Ob eine Frage innerhalb der aktuellen Eingrenzung liegt. Dient der
+   * Oberflaeche dazu, eine bereits angezeigte Frage nur dann durch eine neue
+   * zu ersetzen, wenn sie durch eine geaenderte Eingrenzung aus der
+   * Kandidatenmenge faellt.
+   * @param {string} frageId
+   * @returns {boolean}
+   */
+  function istZugelassen(frageId) {
+    return eingrenzungsBasis().some((frage) => frage.id === frageId);
+  }
+
+  /**
    * Zieht eine Frage gewichtet zufaellig aus der eingegrenzten Kandidatenmenge.
    * Die zuletzt gestellte Frage bleibt aussen vor, solange es eine Alternative
    * innerhalb der Eingrenzung gibt.
@@ -225,6 +237,7 @@ export function erzeugeLernEngine({ katalog, speicher, uhr = Date.now, zufall = 
     lernstandVerworfen: gelesen.verworfen,
 
     naechsteFrage,
+    istZugelassen,
     beantworte,
     istGemeistert,
 

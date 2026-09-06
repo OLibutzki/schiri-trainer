@@ -367,9 +367,11 @@ function baueWissensstufenOptionen() {
 }
 
 /**
- * Wendet die im Baum angehakte Auswahl plus Problemfragen-Kaestchen sofort an
- * und startet neu. Es gibt keinen separaten "Übernehmen"-Button: Jede
- * Aenderung an Baum oder Kaestchen wirkt unmittelbar.
+ * Wendet die im Baum angehakte Auswahl plus Problemfragen-Kaestchen sofort an.
+ * Es gibt keinen separaten "Übernehmen"-Button: Jede Aenderung an Baum oder
+ * Kaestchen wirkt unmittelbar. Die angezeigte Frage bleibt dabei stehen,
+ * solange sie weiterhin zur Eingrenzung passt; nur wenn sie herausfaellt,
+ * wird eine neue gezogen.
  */
 function wendeEingrenzungAn() {
   const { wissensstufen, lektionen } = verdichteAuswahl(katalog, baumAuswahl);
@@ -379,7 +381,7 @@ function wendeEingrenzungAn() {
     nurProblemfragen: anzeige.eingrenzungProblemfragen.checked,
   });
   zeichneEingrenzung();
-  zeigeNaechsteFrage();
+  if (!aktuelleFrage || !engine.istZugelassen(aktuelleFrage.id)) zeigeNaechsteFrage();
 }
 
 /** @returns {string[]} */
@@ -644,9 +646,11 @@ const ZEICHNER = {
   lernfortschritt: zeichneLernfortschritt,
   // Eine angefangene, noch nicht ausgewertete Frage ueberdauert einen
   // Ansichtswechsel; sonst wuerde ein Blick auf den Lernfortschritt sie verwerfen.
+  // Faellt sie zwischenzeitlich aus der Eingrenzung heraus (z. B. durch den
+  // "Problemfragen üben"-Kurzbefehl), wird trotzdem neu gezogen.
   ueben: () => {
     zeichneEingrenzung();
-    if (aktuelleFrage === null || beantwortet) zeigeNaechsteFrage();
+    if (aktuelleFrage === null || beantwortet || !engine.istZugelassen(aktuelleFrage.id)) zeigeNaechsteFrage();
   },
   // Eine laufende oder abgeschlossene Pruefung ueberdauert ebenfalls einen
   // Ansichtswechsel; erst „Neue Prüfung" oder „Abbrechen" setzen sie zurueck.
