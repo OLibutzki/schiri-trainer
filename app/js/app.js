@@ -41,16 +41,15 @@ const anzeige = {
   lernstandhinweis: element('lernstandhinweis'),
 
   ansichten: {
-    start: element('ansicht-start'),
     ueben: element('ansicht-ueben'),
     pruefung: element('ansicht-pruefung'),
     lernfortschritt: element('ansicht-lernfortschritt'),
   },
 
-  startAnteil: element('start-anteil'),
-  startBalken: /** @type {HTMLProgressElement} */ (element('start-balken')),
-  startErlaeuterung: element('start-erlaeuterung'),
-  pruefungFortsetzenHinweis: element('pruefung-fortsetzen-hinweis'),
+  kopfLernfortschritt: element('kopf-lernfortschritt'),
+  kopfBalken: /** @type {HTMLProgressElement} */ (element('kopf-balken')),
+  kopfAnteil: element('kopf-anteil'),
+  pruefungOffenMarkierung: element('pruefung-offen-markierung'),
 
   frageKennung: element('frage-kennung'),
   frageText: element('frage-text'),
@@ -490,6 +489,7 @@ function startePruefung() {
   pruefungAngezeigteFrage = null;
   schreibeOffenePruefung(pruefungSpeicher, pruefungsstand);
   zeichnePruefung();
+  zeichneKopf();
   window.scrollTo({ top: 0 });
 }
 
@@ -504,6 +504,7 @@ function werteAusPruefung() {
   if (istAbgeschlossen(pruefungsstand)) verwirfOffenePruefung(pruefungSpeicher);
   else schreibeOffenePruefung(pruefungSpeicher, pruefungsstand);
   zeichnePruefung();
+  zeichneKopf();
   window.scrollTo({ top: 0 });
 }
 
@@ -571,6 +572,7 @@ function werteAus() {
   anzeige.rueckmeldung.classList.add(bewertung.richtig ? 'rueckmeldung--richtig' : 'rueckmeldung--falsch');
   anzeige.rueckmeldung.hidden = false;
   anzeige.weiter.focus();
+  zeichneKopf();
 }
 
 /**
@@ -599,16 +601,6 @@ function fuelleAufschluesselung(liste, eintraege) {
       return zeile;
     }),
   );
-}
-
-function zeichneStart() {
-  const { gemeistert, gesamt, anteil } = engine.lernfortschritt();
-  anzeige.startAnteil.textContent = alsProzent(anteil);
-  anzeige.startBalken.value = anteil;
-  anzeige.startErlaeuterung.textContent = `${gemeistert} von ${gesamt} Fragen gemeistert.`;
-  // Jeder gehaltene Stand ist unabgeschlossen (siehe werteAusPruefung), also
-  // stets als „offene Prüfung“ anzubieten.
-  anzeige.pruefungFortsetzenHinweis.hidden = pruefungsstand === null;
 }
 
 function zeichneLernfortschritt() {
@@ -646,7 +638,6 @@ function zeichneLernfortschritt() {
  * @type {Record<Ansicht, () => void>}
  */
 const ZEICHNER = {
-  start: zeichneStart,
   lernfortschritt: zeichneLernfortschritt,
   // Eine angefangene, noch nicht ausgewertete Frage ueberdauert einen
   // Ansichtswechsel; sonst wuerde ein Blick auf den Lernfortschritt sie verwerfen.
@@ -661,8 +652,37 @@ const ZEICHNER = {
   pruefung: zeichnePruefung,
 };
 
+/** Die aktuell angezeigte Ansicht; massgeblich fuer die Aktivmarkierung des Kopfbalkens. */
+let aktuelleAnsicht = /** @type {Ansicht} */ ('ueben');
+
+/**
+ * Zeichnet den Kopfbalken (Lernfortschritt als Verweis zur Lernfortschritt-
+ * Ansicht) und die Markierung am Navigationseintrag „Prüfung" neu. Laeuft
+ * losgeloest von einem Ansichtswechsel ueberall dort, wo sich Lernfortschritt
+ * oder Pruefungsstand aendern koennen (siehe Aufrufstellen).
+ */
+function zeichneKopf() {
+  const { anteil } = engine.lernfortschritt();
+  anzeige.kopfBalken.value = anteil;
+  anzeige.kopfAnteil.textContent = alsProzent(anteil);
+  anzeige.kopfLernfortschritt.setAttribute(
+    'aria-label',
+    `Lernfortschritt: ${alsProzent(anteil)}. Zur Lernfortschritt-Ansicht.`,
+  );
+
+  const aktiv = aktuelleAnsicht === 'lernfortschritt';
+  anzeige.kopfLernfortschritt.classList.toggle('navigation-verweis--aktiv', aktiv);
+  if (aktiv) anzeige.kopfLernfortschritt.setAttribute('aria-current', 'page');
+  else anzeige.kopfLernfortschritt.removeAttribute('aria-current');
+
+  // Waehrend des Ergebnis-Bildschirms ist der Stand noch nicht null (das
+  // erledigt erst "Neue Prüfung"), gilt aber nicht mehr als "offen".
+  anzeige.pruefungOffenMarkierung.hidden = pruefungsstand === null || istAbgeschlossen(pruefungsstand);
+}
+
 /** @param {Ansicht} ansicht */
 function zeigeAnsicht(ansicht) {
+  aktuelleAnsicht = ansicht;
   for (const [name, abschnitt] of Object.entries(anzeige.ansichten)) {
     abschnitt.hidden = name !== ansicht;
   }
@@ -675,6 +695,7 @@ function zeigeAnsicht(ansicht) {
     else verweis.removeAttribute('aria-current');
   }
 
+  zeichneKopf();
   ZEICHNER[ansicht]();
   window.scrollTo({ top: 0 });
 }
@@ -844,12 +865,14 @@ anzeige.pruefungAbbrechen.addEventListener('click', () => {
   pruefungAngezeigteFrage = null;
   verwirfOffenePruefung(pruefungSpeicher);
   zeichnePruefung();
+  zeichneKopf();
 });
 
 anzeige.pruefungNeu.addEventListener('click', () => {
   pruefungsstand = null;
   pruefungAngezeigteFrage = null;
   zeichnePruefung();
+  zeichneKopf();
 });
 
 anzeige.zuruecksetzen.addEventListener('click', () => {
@@ -860,6 +883,7 @@ anzeige.zuruecksetzen.addEventListener('click', () => {
   aktuelleFrage = null;
   beantwortet = false;
   zeichneLernfortschritt();
+  zeichneKopf();
 });
 
 try {
@@ -869,7 +893,6 @@ try {
   // Jeder ueberlebende Stand ist unabgeschlossen: Eine abgeschlossene Pruefung
   // wird beim Auswerten sofort verworfen (siehe werteAusPruefung).
   pruefungsstand = liesOffenePruefung(pruefungSpeicher, katalog);
-  anzeige.pruefungFortsetzenHinweis.hidden = pruefungsstand === null;
   zeigeHerkunft();
   initialisiereEingrenzungsBaum();
   fuellePruefungsWissensstufen();
@@ -886,6 +909,7 @@ try {
     'Bitte die Verbindung prüfen und die Seite neu laden.';
   anzeige.ladefehler.hidden = false;
   anzeige.navigation.hidden = true;
+  anzeige.kopfLernfortschritt.hidden = true;
   console.error(fehler);
 }
 

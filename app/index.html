@@ -17,11 +17,22 @@
     <div class="huelle">
       <header class="kopf">
         <h1>Schiri-Trainer</h1>
+        <a class="kopf-lernfortschritt" id="kopf-lernfortschritt" href="#/lernfortschritt">
+          <span class="kopf-lernfortschritt-titel">Lernfortschritt</span>
+          <span class="kopf-lernfortschritt-reihe">
+            <progress class="lernfortschritt-balken" id="kopf-balken" max="1" value="0"></progress>
+            <span class="kopf-lernfortschritt-zahl" id="kopf-anteil">0 %</span>
+            <span class="kopf-lernfortschritt-pfeil" aria-hidden="true">›</span>
+          </span>
+        </a>
         <nav class="navigation" id="navigation" aria-label="Ansichten">
-          <a href="#/" data-ansicht="start">Start</a>
           <a href="#/ueben" data-ansicht="ueben">Üben</a>
-          <a href="#/pruefung" data-ansicht="pruefung">Prüfung</a>
-          <a href="#/lernfortschritt" data-ansicht="lernfortschritt">Lernfortschritt</a>
+          <a href="#/pruefung" data-ansicht="pruefung">
+            Prüfung
+            <span class="pruefung-offen-markierung" id="pruefung-offen-markierung" hidden
+              ><span class="ist-nur-screenreader">, offene Prüfung</span></span
+            >
+          </a>
         </nav>
       </header>
 
@@ -29,23 +40,6 @@
       <section id="lernstandhinweis" class="meldung meldung--hinweis" hidden></section>
 
       <main>
-        <section id="ansicht-start" class="ansicht" hidden>
-          <p class="meldung meldung--hinweis" id="pruefung-fortsetzen-hinweis" hidden>
-            Es gibt eine offene Prüfung.
-            <a href="#/pruefung">Fortsetzen</a>
-          </p>
-
-          <h2>Lernfortschritt</h2>
-          <p class="lernfortschritt-zahl"><span id="start-anteil">0 %</span></p>
-          <progress class="lernfortschritt-balken" id="start-balken" max="1" value="0"></progress>
-          <p class="lernfortschritt-erlaeuterung" id="start-erlaeuterung"></p>
-          <div class="schaltflaechen">
-            <a class="schaltflaeche schaltflaeche--haupt" href="#/ueben">Üben</a>
-            <a class="schaltflaeche" href="#/pruefung">Prüfung starten</a>
-            <a class="schaltflaeche" href="#/lernfortschritt">Lernfortschritt ansehen</a>
-          </div>
-        </section>
-
         <section id="ansicht-ueben" class="ansicht" hidden>
           <details class="eingrenzung-auswahl" id="eingrenzung-auswahl">
             <summary><span id="eingrenzung-zusammenfassung">Alle Lektionen</span></summary>
@@ -86,7 +80,6 @@
 
         <section id="ansicht-pruefung" class="ansicht" hidden>
           <section id="pruefung-einrichtung">
-            <h2>Prüfung</h2>
             <p class="hinweis">
               Eine vorab gewählte Zahl von Fragen am Stück, ohne Rückmeldung zwischendurch. Das Ergebnis
               erscheint erst am Ende; der Lernfortschritt bleibt unberührt.
