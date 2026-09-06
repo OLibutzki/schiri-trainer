@@ -2,9 +2,9 @@
 /** @import { Ansicht } from './routing.js' */
 /** @import { Bewertung } from './antwort.js' */
 /** @import { Katalog } from './typen.js' */
-/** @import { LernfortschrittTeil } from './lernengine.js' */
+/** @import { LernfortschrittTeil, Eingrenzung } from './lernengine.js' */
 /** @import { Pruefungsstand } from './pruefung.js' */
-import { ladeKatalog, bezeichneFrage } from './katalog.js';
+import { ladeKatalog, bezeichneFrage, findeLektion, findeWissensstufe } from './katalog.js';
 import { mische } from './mischen.js';
 import { erzeugeLernEngine } from './lernengine.js';
 import { browserSpeicher } from './lernstand.js';
@@ -61,6 +61,14 @@ const anzeige = {
   weiter: element('weiter'),
   keineFrage: element('keine-frage'),
 
+  eingrenzungAktiv: element('eingrenzung-aktiv'),
+  eingrenzungBeschreibung: element('eingrenzung-beschreibung'),
+  eingrenzungAufheben: /** @type {HTMLButtonElement} */ (element('eingrenzung-aufheben')),
+  eingrenzungAuswahl: /** @type {HTMLDetailsElement} */ (element('eingrenzung-auswahl')),
+  eingrenzungWissensstufe: /** @type {HTMLSelectElement} */ (element('eingrenzung-wissensstufe')),
+  eingrenzungLektionen: element('eingrenzung-lektionen'),
+  eingrenzungUebernehmen: /** @type {HTMLButtonElement} */ (element('eingrenzung-uebernehmen')),
+
   pruefungEinrichtung: element('pruefung-einrichtung'),
   pruefungFragenzahl: /** @type {HTMLSelectElement} */ (element('pruefung-fragenzahl')),
   pruefungWissensstufeFeld: element('pruefung-wissensstufe-feld'),
@@ -86,6 +94,7 @@ const anzeige = {
   lernfortschrittLektionen: element('lernfortschritt-lektionen'),
   problemfragen: element('problemfragen'),
   problemfragenLeer: element('problemfragen-leer'),
+  problemfragenUeben: /** @type {HTMLButtonElement} */ (element('problemfragen-ueben')),
   zuruecksetzen: /** @type {HTMLButtonElement} */ (element('zuruecksetzen')),
 };
 
@@ -181,10 +190,115 @@ function zeigeNaechsteFrage() {
     anzeige.rueckmeldung.hidden = true;
     anzeige.frageKennung.textContent = '';
     anzeige.frageText.textContent = '';
+    anzeige.keineFrage.textContent = engine.eingrenzung()
+      ? 'Für diese Eingrenzung gibt es keine Frage. Eingrenzung oben aufheben, um weiterzuüben.'
+      : 'Der Katalog enthält keine Frage zum Üben.';
     anzeige.keineFrage.hidden = false;
     return;
   }
   zeigeFrage(frage);
+}
+
+/**
+ * Beschreibt eine Eingrenzung fuer die Anzeige.
+ * @param {Eingrenzung} eingrenzung
+ * @returns {string}
+ */
+function beschreibeEingrenzung(eingrenzung) {
+  switch (eingrenzung.typ) {
+    case 'wissensstufe': {
+      const stufe = findeWissensstufe(katalog, eingrenzung.id);
+      return `Eingegrenzt auf Wissensstufe „${stufe ? stufe.name : eingrenzung.id}".`;
+    }
+    case 'lektion': {
+      const titel = eingrenzung.ids.map((/** @type {string} */ id) => {
+        const lektion = findeLektion(katalog, id);
+        return lektion ? `Lektion ${lektion.nummer}: ${lektion.titel}` : id;
+      });
+      return `Eingegrenzt auf ${titel.join(', ')}.`;
+    }
+    case 'problemfragen':
+      return 'Eingegrenzt auf Problemfragen.';
+    default:
+      return '';
+  }
+}
+
+/** Zeichnet die Anzeige der aktiven Eingrenzung (oder deren Fehlen). */
+function zeichneEingrenzung() {
+  const eingrenzung = engine.eingrenzung();
+  anzeige.eingrenzungAktiv.hidden = eingrenzung === null;
+  if (eingrenzung) anzeige.eingrenzungBeschreibung.textContent = beschreibeEingrenzung(eingrenzung);
+}
+
+/** Fuellt Wissensstufen-Auswahl und Lektionen-Liste der Eingrenzung. */
+function fuelleEingrenzungsAuswahl() {
+  anzeige.eingrenzungWissensstufe.append(
+    ...[...katalog.metadaten.wissensstufen]
+      .sort((a, b) => a.reihenfolge - b.reihenfolge)
+      .map((stufe) => {
+        const option = document.createElement('option');
+        option.value = stufe.id;
+        option.textContent = stufe.name;
+        return option;
+      }),
+  );
+
+  anzeige.eingrenzungLektionen.replaceChildren(
+    ...katalog.metadaten.lektionen.map((lektion) => {
+      const zeile = document.createElement('li');
+      const feld = document.createElement('label');
+      const kaestchen = document.createElement('input');
+      kaestchen.type = 'checkbox';
+      kaestchen.name = 'eingrenzung-lektion';
+      kaestchen.value = lektion.id;
+      const text = document.createElement('span');
+      text.textContent = `Lektion ${lektion.nummer}: ${lektion.titel}`;
+      feld.append(kaestchen, text);
+      zeile.append(feld);
+      return zeile;
+    }),
+  );
+}
+
+/** @returns {string[]} Die Kennungen der in der Eingrenzung angehakten Lektionen. */
+function gewaehlteLektionen() {
+  return [
+    .../** @type {NodeListOf<HTMLInputElement>} */ (
+      anzeige.eingrenzungLektionen.querySelectorAll('input[type="checkbox"]:checked')
+    ),
+  ].map((kaestchen) => kaestchen.value);
+}
+
+/** Uebernimmt die in der Auswahl getroffene Eingrenzung und startet neu. */
+function uebernehmeEingrenzung() {
+  const lektionen = gewaehlteLektionen();
+  const wissensstufe = anzeige.eingrenzungWissensstufe.value;
+  /** @type {Eingrenzung | null} */
+  let neu = null;
+  // Wissensstufe und Lektionen schliessen sich gegenseitig aus (siehe die
+  // Ereignis-Handler unten, die bei Auswahl der einen die andere zuruecksetzen);
+  // Lektionen haben Vorrang, falls dennoch beides gesetzt ist.
+  if (lektionen.length > 0) neu = { typ: 'lektion', ids: lektionen };
+  else if (wissensstufe !== '') neu = { typ: 'wissensstufe', id: wissensstufe };
+
+  engine.setzeEingrenzung(neu);
+  anzeige.eingrenzungAuswahl.open = false;
+  zeichneEingrenzung();
+  zeigeNaechsteFrage();
+}
+
+/** Hebt eine aktive Eingrenzung auf und startet den Uebungslauf neu. */
+function hebeEingrenzungAuf() {
+  engine.setzeEingrenzung(null);
+  anzeige.eingrenzungWissensstufe.value = '';
+  for (const kaestchen of /** @type {NodeListOf<HTMLInputElement>} */ (
+    anzeige.eingrenzungLektionen.querySelectorAll('input[type="checkbox"]')
+  )) {
+    kaestchen.checked = false;
+  }
+  zeichneEingrenzung();
+  zeigeNaechsteFrage();
 }
 
 /** @returns {string[]} */
@@ -445,6 +559,7 @@ function zeichneLernfortschritt() {
 
   const problemfragen = engine.problemfragen();
   anzeige.problemfragenLeer.hidden = problemfragen.length > 0;
+  anzeige.problemfragenUeben.hidden = problemfragen.length === 0;
   anzeige.problemfragen.replaceChildren(
     ...problemfragen.map((frage) => {
       const zeile = document.createElement('li');
@@ -474,6 +589,7 @@ const ZEICHNER = {
   // Eine angefangene, noch nicht ausgewertete Frage ueberdauert einen
   // Ansichtswechsel; sonst wuerde ein Blick auf den Lernfortschritt sie verwerfen.
   ueben: () => {
+    zeichneEingrenzung();
     if (aktuelleFrage === null || beantwortet) zeigeNaechsteFrage();
   },
   // Eine laufende oder abgeschlossene Pruefung ueberdauert ebenfalls einen
@@ -517,6 +633,31 @@ anzeige.weiter.addEventListener('click', () => {
   window.scrollTo({ top: 0 });
 });
 
+anzeige.eingrenzungUebernehmen.addEventListener('click', uebernehmeEingrenzung);
+anzeige.eingrenzungAufheben.addEventListener('click', hebeEingrenzungAuf);
+
+// Wissensstufe und Lektionen schliessen sich gegenseitig aus: Die Auswahl der
+// einen setzt die andere zurueck, damit die Anzeige nie beide gleichzeitig
+// gewaehlt zeigt, obwohl nur eine davon uebernommen wuerde.
+anzeige.eingrenzungWissensstufe.addEventListener('change', () => {
+  if (anzeige.eingrenzungWissensstufe.value === '') return;
+  for (const kaestchen of /** @type {NodeListOf<HTMLInputElement>} */ (
+    anzeige.eingrenzungLektionen.querySelectorAll('input[type="checkbox"]')
+  )) {
+    kaestchen.checked = false;
+  }
+});
+
+anzeige.eingrenzungLektionen.addEventListener('change', (ereignis) => {
+  if (!(/** @type {HTMLInputElement} */ (ereignis.target).checked)) return;
+  anzeige.eingrenzungWissensstufe.value = '';
+});
+
+anzeige.problemfragenUeben.addEventListener('click', () => {
+  engine.setzeEingrenzung({ typ: 'problemfragen' });
+  window.location.hash = '#/ueben';
+});
+
 anzeige.pruefungStarten.addEventListener('click', startePruefung);
 
 anzeige.pruefungFormular.addEventListener('submit', (ereignis) => {
@@ -558,6 +699,7 @@ try {
   pruefungsstand = liesOffenePruefung(pruefungSpeicher, katalog);
   anzeige.pruefungFortsetzenHinweis.hidden = pruefungsstand === null;
   zeigeHerkunft();
+  fuelleEingrenzungsAuswahl();
   fuellePruefungsWissensstufen();
   if (engine.lernstandVerworfen) {
     anzeige.lernstandhinweis.textContent =
