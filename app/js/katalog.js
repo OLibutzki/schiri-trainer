@@ -38,15 +38,21 @@ export function findeWissensstufe(katalog, id) {
 
 /**
  * Bezeichnung einer Frage fuer die Anzeige, z. B. „Basiswissen · Lektion 3 · Frage 18".
+ * Die Wissensstufe entfaellt, solange der Katalog nur eine kennt; der
+ * Lektionstitel steht bereits in der Eingrenzung darueber und wird hier
+ * weggelassen.
  * @param {Katalog} katalog
  * @param {Frage} frage
  * @returns {string}
  */
 export function bezeichneFrage(katalog, frage) {
-  const stufe = findeWissensstufe(katalog, frage.wissensstufe);
+  const teile = [];
+  if (katalog.metadaten.wissensstufen.length > 1) {
+    const stufe = findeWissensstufe(katalog, frage.wissensstufe);
+    teile.push(stufe ? stufe.name : frage.wissensstufe);
+  }
   const lektion = findeLektion(katalog, frage.lektion);
-  const teile = [stufe ? stufe.name : frage.wissensstufe];
-  if (lektion) teile.push(`Lektion ${lektion.nummer}: ${lektion.titel}`);
+  if (lektion) teile.push(`Lektion ${lektion.nummer}`);
   teile.push(`Frage ${frage.nummer}`);
   return teile.join(' · ');
 }

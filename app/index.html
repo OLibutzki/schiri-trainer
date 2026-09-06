@@ -16,15 +16,17 @@
   <body>
     <div class="huelle">
       <header class="kopf">
-        <h1>Schiri-Trainer</h1>
-        <a class="kopf-lernfortschritt" id="kopf-lernfortschritt" href="#/lernfortschritt">
-          <span class="kopf-lernfortschritt-titel">Lernfortschritt</span>
-          <span class="kopf-lernfortschritt-reihe">
-            <progress class="lernfortschritt-balken" id="kopf-balken" max="1" value="0"></progress>
-            <span class="kopf-lernfortschritt-zahl" id="kopf-anteil">0 %</span>
-            <span class="kopf-lernfortschritt-pfeil" aria-hidden="true">›</span>
-          </span>
-        </a>
+        <div class="kopf-zeile">
+          <h1>Schiri-Trainer</h1>
+          <a class="kopf-lernfortschritt" id="kopf-lernfortschritt" href="#/lernfortschritt">
+            <span class="kopf-lernfortschritt-titel" id="kopf-lernfortschritt-titel">Lernfortschritt</span>
+            <span class="kopf-lernfortschritt-reihe">
+              <progress class="lernfortschritt-balken" id="kopf-balken" max="1" value="0"></progress>
+              <span class="kopf-lernfortschritt-zahl" id="kopf-anteil">0 %</span>
+              <span class="kopf-lernfortschritt-pfeil" aria-hidden="true">›</span>
+            </span>
+          </a>
+        </div>
         <nav class="navigation" id="navigation" aria-label="Ansichten">
           <a href="#/ueben" data-ansicht="ueben">Üben</a>
           <a href="#/pruefung" data-ansicht="pruefung">
@@ -41,7 +43,7 @@
 
       <main>
         <section id="ansicht-ueben" class="ansicht" hidden>
-          <details class="eingrenzung-auswahl" id="eingrenzung-auswahl">
+          <details class="eingrenzung-auswahl eingrenzung-auswahl--schmal" id="eingrenzung-auswahl">
             <summary><span id="eingrenzung-zusammenfassung">Alle Lektionen</span></summary>
 
             <label class="eingrenzung-alle">

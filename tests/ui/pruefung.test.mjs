@@ -73,6 +73,22 @@ test('wertet eine vollstaendig beantwortete Pruefung aus', async () => {
   assert.ok(await seite.isVisible('#pruefung-neu'), '„Neue Prüfung" fehlt');
 });
 
+test('zeigt im Kopfbalken den Pruefungsfortschritt statt des Lernfortschritts', async () => {
+  const seite = await oeffne(umgebung.browser, umgebung.adresse, { ansicht: '/pruefung' });
+
+  await starte(seite);
+  assert.equal((await seite.textContent('#kopf-anteil'))?.trim(), 'Frage 1 von 10');
+
+  await seite.locator('#pruefung-optionen .option').first().click();
+  await seite.click('#pruefung-abgeben');
+  await seite.waitForFunction(
+    () => document.getElementById('kopf-anteil')?.textContent?.trim() === 'Frage 2 von 10',
+  );
+
+  await beantworteAlles(seite);
+  assert.match((await seite.textContent('#kopf-anteil')) ?? '', /%$/, 'zeigt nach Abschluss nicht wieder den Lernfortschritt');
+});
+
 test('laesst den Lernfortschritt von einer Pruefung unberuehrt', async () => {
   const seite = await oeffne(umgebung.browser, umgebung.adresse, { ansicht: '/pruefung' });
   const vorher = await seite.textContent('#kopf-anteil');

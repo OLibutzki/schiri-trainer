@@ -48,6 +48,7 @@ const anzeige = {
   },
 
   kopfLernfortschritt: element('kopf-lernfortschritt'),
+  kopfLernfortschrittTitel: element('kopf-lernfortschritt-titel'),
   kopfBalken: /** @type {HTMLProgressElement} */ (element('kopf-balken')),
   kopfAnteil: element('kopf-anteil'),
   pruefungOffenMarkierung: element('pruefung-offen-markierung'),
@@ -709,13 +710,27 @@ function leuchteKopfAuf(wechsel) {
  *   `unveraendert`/`null` ein Aufleuchten der Zeile aus (siehe `leuchteKopfAuf`).
  */
 function zeichneKopf(meisterungswechsel = null) {
-  const { anteil } = engine.lernfortschritt();
-  anzeige.kopfBalken.value = anteil;
-  anzeige.kopfAnteil.textContent = alsProzent(anteil);
-  anzeige.kopfLernfortschritt.setAttribute(
-    'aria-label',
-    `Lernfortschritt: ${alsProzent(anteil)}. Zur Lernfortschritt-Ansicht.`,
-  );
+  // Waehrend einer laufenden Pruefung zeigt der Kopfbalken deren Fortschritt:
+  // Er ist das prominenteste Element, der Lernfortschritt aber bleibt von
+  // einer Pruefung unberuehrt und waere dort irrefuehrend (Issue #33).
+  if (pruefungsstand && !istAbgeschlossen(pruefungsstand) && aktuelleAnsicht === 'pruefung') {
+    const index = offenerIndex(pruefungsstand);
+    const anteil = index / pruefungsstand.frageIds.length;
+    const fortschrittstext = `Frage ${index + 1} von ${pruefungsstand.frageIds.length}`;
+    anzeige.kopfBalken.value = anteil;
+    anzeige.kopfAnteil.textContent = fortschrittstext;
+    anzeige.kopfLernfortschrittTitel.textContent = 'Prüfung';
+    anzeige.kopfLernfortschritt.setAttribute('aria-label', `Pruefung: ${fortschrittstext}.`);
+  } else {
+    const { anteil } = engine.lernfortschritt();
+    anzeige.kopfBalken.value = anteil;
+    anzeige.kopfAnteil.textContent = alsProzent(anteil);
+    anzeige.kopfLernfortschrittTitel.textContent = 'Lernfortschritt';
+    anzeige.kopfLernfortschritt.setAttribute(
+      'aria-label',
+      `Lernfortschritt: ${alsProzent(anteil)}. Zur Lernfortschritt-Ansicht.`,
+    );
+  }
 
   const aktiv = aktuelleAnsicht === 'lernfortschritt';
   anzeige.kopfLernfortschritt.classList.toggle('navigation-verweis--aktiv', aktiv);

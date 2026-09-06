@@ -1,6 +1,4 @@
-// Uebungsansicht im Browser. Die mit `todo` markierten Tests halten die
-// Abnahmekriterien offener Issues fest: Sie laufen mit, schlagen heute fehl
-// und zaehlen dabei nicht als Fehler — bis die Behebung sie gruen macht.
+// Uebungsansicht im Browser.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { starteUmgebung, oeffne, masse, MOBIL, DESKTOP } from './umgebung.mjs';
@@ -80,13 +78,9 @@ test('nennt den Tastaturhinweis nur, wo er zutrifft', async () => {
   assert.ok(amDesktop.includes('Zifferntasten'), 'Desktop-Hinweis fehlt am Desktop');
 });
 
-test(
-  'laesst die Frage im oberen Bildschirmdrittel beginnen',
-  { todo: 'Issue #33' },
-  async () => {
-    const seite = await oeffne(umgebung.browser, umgebung.adresse, { geraet: MOBIL });
-    const kennung = await masse(seite, '#frage-kennung');
-    assert.ok(kennung, 'Fragekennung fehlt');
-    assert.ok(kennung.oben < 200, `Frage beginnt erst bei ${kennung.oben} px statt unter 200 px`);
-  },
-);
+test('laesst die Frage im oberen Bildschirmdrittel beginnen', async () => {
+  const seite = await oeffne(umgebung.browser, umgebung.adresse, { geraet: MOBIL });
+  const kennung = await masse(seite, '#frage-kennung');
+  assert.ok(kennung, 'Fragekennung fehlt');
+  assert.ok(kennung.oben < 200, `Frage beginnt erst bei ${kennung.oben} px statt unter 200 px`);
+});
