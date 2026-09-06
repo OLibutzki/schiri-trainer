@@ -289,6 +289,60 @@ test('der Lernfortschritt wird je Wissensstufe und je Lektion aufgeschluesselt',
   ]);
 });
 
+test('eine Eingrenzung auf eine Lektion laesst nur deren Fragen zu', () => {
+  const { engine } = engineMit({ fragen: 4 });
+  engine.setzeEingrenzung({ typ: 'lektion', ids: ['basiswissen-1'] });
+  for (let i = 0; i < 200; i += 1) {
+    const frage = engine.naechsteFrage();
+    assert.ok(frage);
+    assert.equal(frage.lektion, 'basiswissen-1');
+  }
+});
+
+test('eine Eingrenzung auf eine Wissensstufe laesst nur deren Fragen zu', () => {
+  const { katalog, engine } = engineMit({ fragen: 4 });
+  katalog.metadaten.wissensstufen.push({ id: 'aufbauwissen', name: 'Aufbauwissen', reihenfolge: 2 });
+  katalog.fragen[3].wissensstufe = 'aufbauwissen';
+  engine.setzeEingrenzung({ typ: 'wissensstufe', id: 'basiswissen' });
+  for (let i = 0; i < 200; i += 1) {
+    assert.notEqual(engine.naechsteFrage()?.id, 'basiswissen-4');
+  }
+});
+
+test('eine Eingrenzung auf Problemfragen laesst nur diese zu', () => {
+  const { katalog, engine } = engineMit({ fragen: 4 });
+  engine.beantworte(katalog.fragen[0], ['b']);
+  engine.setzeEingrenzung({ typ: 'problemfragen' });
+  for (let i = 0; i < 50; i += 1) {
+    assert.equal(engine.naechsteFrage()?.id, 'basiswissen-1');
+  }
+});
+
+test('eine leere Kandidatenmenge unter Eingrenzung liefert keine Frage statt eines Fehlers', () => {
+  const { engine } = engineMit({ fragen: 4 });
+  engine.setzeEingrenzung({ typ: 'problemfragen' });
+  assert.equal(engine.naechsteFrage(), null);
+});
+
+test('eine einelementige Kandidatenmenge unter Eingrenzung wird wiederholt gestellt', () => {
+  // katalogMit(3) legt Frage 3 allein in Lektion 2 (siehe katalogMit).
+  const { engine } = engineMit({ fragen: 3 });
+  engine.setzeEingrenzung({ typ: 'lektion', ids: ['basiswissen-2'] });
+  assert.equal(engine.naechsteFrage()?.id, 'basiswissen-3');
+  assert.equal(engine.naechsteFrage()?.id, 'basiswissen-3');
+});
+
+test('das Aufheben einer Eingrenzung gibt wieder den gesamten Katalog frei', () => {
+  const { engine } = engineMit({ fragen: 4 });
+  engine.setzeEingrenzung({ typ: 'lektion', ids: ['basiswissen-1'] });
+  engine.naechsteFrage();
+  engine.setzeEingrenzung(null);
+  assert.equal(engine.eingrenzung(), null);
+  const gesehen = new Set();
+  for (let i = 0; i < 200; i += 1) gesehen.add(engine.naechsteFrage()?.id);
+  assert.ok(gesehen.has('basiswissen-3') || gesehen.has('basiswissen-4'));
+});
+
 test('Zuruecksetzen loescht den Lernfortschritt dauerhaft', () => {
   const speicher = arbeitsspeicher();
   const { katalog, engine } = engineMit({ speicher });

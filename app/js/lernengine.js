@@ -43,6 +43,16 @@ const UNBERUEHRT = Object.freeze({ folge: 0, falsch: 0, zuletzt: null });
  */
 
 /**
+ * Eine Eingrenzung reduziert die Kandidatenmenge eines Uebungslaufs, bevor
+ * gewichtet wird. `null` bedeutet: kein Ausschluss, der gesamte Katalog gilt.
+ * @typedef {
+ *   | { typ: 'wissensstufe', id: string }
+ *   | { typ: 'lektion', ids: string[] }
+ *   | { typ: 'problemfragen' }
+ * } Eingrenzung
+ */
+
+/**
  * @param {number} gemeistert
  * @param {number} gesamt
  * @returns {Lernfortschritt}
@@ -67,6 +77,8 @@ export function erzeugeLernEngine({ katalog, speicher, uhr = Date.now, zufall = 
   let eintraege = gelesen.eintraege;
   /** @type {string | null} */
   let zuletztGestellt = null;
+  /** @type {Eingrenzung | null} */
+  let eingrenzungAktuell = null;
 
   /**
    * @param {string} frageId
@@ -103,15 +115,43 @@ export function erzeugeLernEngine({ katalog, speicher, uhr = Date.now, zufall = 
   }
 
   /**
-   * Zieht eine Frage gewichtet zufaellig. Die zuletzt gestellte Frage bleibt
-   * aussen vor, solange es eine Alternative gibt.
+   * Fragen, die mindestens einmal falsch beantwortet und noch nicht
+   * gemeistert sind. Ein Stand zu einer Kennung, die es im Katalog nicht
+   * gibt, bleibt hier folgenlos: Gezaehlt wird ueber den Katalog.
+   * @returns {Frage[]}
+   */
+  function problemfragenBerechnen() {
+    return katalog.fragen.filter((frage) => eintrag(frage.id).falsch > 0 && !istGemeistert(frage.id));
+  }
+
+  /**
+   * Die Kandidatenmenge vor Anwendung der Gewichtung: der gesamte Katalog
+   * ohne Eingrenzung, sonst nur die Fragen, auf die sie zutrifft.
+   * @returns {Frage[]}
+   */
+  function eingrenzungsBasis() {
+    if (eingrenzungAktuell === null) return katalog.fragen;
+    switch (eingrenzungAktuell.typ) {
+      case 'wissensstufe':
+        return katalog.fragen.filter((frage) => frage.wissensstufe === eingrenzungAktuell.id);
+      case 'lektion':
+        return katalog.fragen.filter((frage) => eingrenzungAktuell.ids.includes(frage.lektion));
+      case 'problemfragen':
+        return problemfragenBerechnen();
+      default:
+        return katalog.fragen;
+    }
+  }
+
+  /**
+   * Zieht eine Frage gewichtet zufaellig aus der eingegrenzten Kandidatenmenge.
+   * Die zuletzt gestellte Frage bleibt aussen vor, solange es eine Alternative
+   * innerhalb der Eingrenzung gibt.
    * @returns {Frage | null}
    */
   function naechsteFrage() {
-    const kandidaten =
-      katalog.fragen.length > 1
-        ? katalog.fragen.filter((frage) => frage.id !== zuletztGestellt)
-        : katalog.fragen;
+    const basis = eingrenzungsBasis();
+    const kandidaten = basis.length > 1 ? basis.filter((frage) => frage.id !== zuletztGestellt) : basis;
     if (kandidaten.length === 0) return null;
 
     const gewichte = kandidaten.map(gewicht);
@@ -191,14 +231,21 @@ export function erzeugeLernEngine({ katalog, speicher, uhr = Date.now, zufall = 
         ...lernfortschrittUeber(katalog.fragen.filter((frage) => frage.lektion === lektion.id)),
       })),
 
+    problemfragen: problemfragenBerechnen,
+
     /**
-     * Fragen, die mindestens einmal falsch beantwortet und noch nicht
-     * gemeistert sind. Ein Stand zu einer Kennung, die es im Katalog nicht
-     * gibt, bleibt hier folgenlos: Gezaehlt wird ueber den Katalog.
-     * @returns {Frage[]}
+     * Setzt oder hebt die Eingrenzung eines Uebungslaufs auf. Der Wechsel
+     * loest die Sperre der zuletzt gestellten Frage, da sie sich auf eine
+     * andere Kandidatenmenge bezog.
+     * @param {Eingrenzung | null} neu
      */
-    problemfragen: () =>
-      katalog.fragen.filter((frage) => eintrag(frage.id).falsch > 0 && !istGemeistert(frage.id)),
+    setzeEingrenzung: (neu) => {
+      eingrenzungAktuell = neu;
+      zuletztGestellt = null;
+    },
+
+    /** @returns {Eingrenzung | null} */
+    eingrenzung: () => eingrenzungAktuell,
 
     /** Verwirft den gesamten Lernfortschritt, auch im Speicher. */
     setzeZurueck: () => {
