@@ -16,6 +16,12 @@ import {
   beantworte as beantwortePruefung,
   ergebnis as auswertePruefung,
 } from './pruefung.js';
+import {
+  liesOffenePruefung,
+  schreibeOffenePruefung,
+  verwirfOffenePruefung,
+  PRUEFUNGSSTAND_SCHLUESSEL,
+} from './pruefungsstand.js';
 
 /**
  * @param {string} id
@@ -43,6 +49,7 @@ const anzeige = {
   startAnteil: element('start-anteil'),
   startBalken: /** @type {HTMLProgressElement} */ (element('start-balken')),
   startErlaeuterung: element('start-erlaeuterung'),
+  pruefungFortsetzenHinweis: element('pruefung-fortsetzen-hinweis'),
 
   frageKennung: element('frage-kennung'),
   frageText: element('frage-text'),
@@ -86,6 +93,8 @@ const anzeige = {
 let katalog;
 /** @type {ReturnType<typeof erzeugeLernEngine>} */
 let engine;
+/** @type {import('./lernstand.js').Speicher} Getrennt vom Lernfortschritt (Issue #8). */
+let pruefungSpeicher;
 /** @type {Frage | null} */
 let aktuelleFrage = null;
 /** Ob die angezeigte Frage bereits ausgewertet wurde. */
@@ -273,12 +282,22 @@ function zeichnePruefung() {
   );
 }
 
-/** Liest die Einrichtung und startet eine neue Pruefung. */
+/**
+ * Liest die Einrichtung und startet eine neue Pruefung. Eine noch offene
+ * (unabgeschlossene) Prüfung wird dabei erst nach ausdrücklicher Bestätigung
+ * überschrieben.
+ */
 function startePruefung() {
+  if (pruefungsstand && !istAbgeschlossen(pruefungsstand)) {
+    if (!window.confirm('Es gibt eine offene Prüfung. Eine neue Prüfung ersetzt sie unwiderruflich. Fortfahren?')) {
+      return;
+    }
+  }
   const fragenzahl = Number(anzeige.pruefungFragenzahl.value);
   const wissensstufe = anzeige.pruefungWissensstufe.value || null;
   pruefungsstand = erzeugePruefung({ katalog, fragenzahl, wissensstufe });
   pruefungAngezeigteFrage = null;
+  schreibeOffenePruefung(pruefungSpeicher, pruefungsstand);
   zeichnePruefung();
   window.scrollTo({ top: 0 });
 }
@@ -289,6 +308,10 @@ function werteAusPruefung() {
     .filter((feld) => feld.checked)
     .map((feld) => feld.value);
   pruefungsstand = beantwortePruefung(pruefungsstand, gewaehlt);
+  // Abgeschlossen gilt eine Pruefung nicht mehr als „offen“: Es gibt nichts
+  // mehr fortzusetzen, der Zwischenstand wird verworfen statt aufgehoben.
+  if (istAbgeschlossen(pruefungsstand)) verwirfOffenePruefung(pruefungSpeicher);
+  else schreibeOffenePruefung(pruefungSpeicher, pruefungsstand);
   zeichnePruefung();
   window.scrollTo({ top: 0 });
 }
@@ -377,6 +400,9 @@ function zeichneStart() {
   anzeige.startAnteil.textContent = alsProzent(anteil);
   anzeige.startBalken.value = anteil;
   anzeige.startErlaeuterung.textContent = `${gemeistert} von ${gesamt} Fragen gemeistert.`;
+  // Jeder gehaltene Stand ist unabgeschlossen (siehe werteAusPruefung), also
+  // stets als „offene Prüfung“ anzubieten.
+  anzeige.pruefungFortsetzenHinweis.hidden = pruefungsstand === null;
 }
 
 function zeichneLernfortschritt() {
@@ -473,6 +499,7 @@ anzeige.pruefungAbbrechen.addEventListener('click', () => {
   if (!window.confirm('Die laufende Prüfung abbrechen? Der Zwischenstand geht verloren.')) return;
   pruefungsstand = null;
   pruefungAngezeigteFrage = null;
+  verwirfOffenePruefung(pruefungSpeicher);
   zeichnePruefung();
 });
 
@@ -495,6 +522,11 @@ anzeige.zuruecksetzen.addEventListener('click', () => {
 try {
   katalog = await ladeKatalog();
   engine = erzeugeLernEngine({ katalog, speicher: browserSpeicher() });
+  pruefungSpeicher = browserSpeicher(PRUEFUNGSSTAND_SCHLUESSEL);
+  // Jeder ueberlebende Stand ist unabgeschlossen: Eine abgeschlossene Pruefung
+  // wird beim Auswerten sofort verworfen (siehe werteAusPruefung).
+  pruefungsstand = liesOffenePruefung(pruefungSpeicher, katalog);
+  anzeige.pruefungFortsetzenHinweis.hidden = pruefungsstand === null;
   zeigeHerkunft();
   fuellePruefungsWissensstufen();
   if (engine.lernstandVerworfen) {
