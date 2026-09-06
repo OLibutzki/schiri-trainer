@@ -101,12 +101,6 @@ body {
   accent-color: var(--akzent);
 }
 
-.option-buchstabe {
-  flex: none;
-  font-variant-numeric: tabular-nums;
-  color: var(--schrift-leise);
-}
-
 .option--korrekt {
   border-color: var(--richtig);
   background: var(--richtig-grund);
@@ -165,7 +159,7 @@ body {
 }
 
 .rueckmeldung-urteil {
-  margin: 0 0 0.25rem;
+  margin: 0 0 1rem;
   font-weight: 600;
 }
 
@@ -175,12 +169,6 @@ body {
 
 .rueckmeldung--falsch .rueckmeldung-urteil {
   color: var(--falsch);
-}
-
-.rueckmeldung-erlaeuterung {
-  margin: 0 0 1rem;
-  color: var(--schrift-leise);
-  font-size: 0.9375rem;
 }
 
 .meldung {
