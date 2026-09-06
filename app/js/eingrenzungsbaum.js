@@ -30,6 +30,17 @@ export function baueStufenMitLektionen(katalog) {
 }
 
 /**
+ * Alle Lektion-Ids des Katalogs. Der Standardzustand des Baums: jedes
+ * Kaestchen startet angehakt, sodass "keine Einschraenkung" sichtbar als
+ * "alles angehakt" erscheint statt sich aus einer leeren Auswahl abzuleiten.
+ * @param {Katalog} katalog
+ * @returns {Set<string>}
+ */
+export function alleLektionIds(katalog) {
+  return new Set(katalog.metadaten.lektionen.map((lektion) => lektion.id));
+}
+
+/**
  * Der Tri-State-Zustand der Kopfzeile einer Stufe, abgeleitet aus den
  * angehakten Lektionen darunter.
  * @param {{ id: string }[]} lektionenDerStufe
@@ -48,12 +59,19 @@ export function stufenZustand(lektionenDerStufe, gewaehlteLektionIds) {
  * Verdichtet die angehakten Lektionen zurueck ins Eingrenzungsformat: Ist eine
  * Stufe vollstaendig angehakt, wandert ihre Id in `wissensstufen` statt all
  * ihrer Lektionen einzeln in `lektionen` — sowohl kompakter als auch robust
- * gegenueber spaeter hinzukommenden Lektionen der Stufe.
+ * gegenueber spaeter hinzukommenden Lektionen der Stufe. Ist wirklich jede
+ * Lektion des Katalogs angehakt (der Ausgangszustand des Baums), gilt das
+ * unmittelbar als keine Einschraenkung statt als eine Liste aller Stufen.
  * @param {Katalog} katalog
  * @param {ReadonlySet<string>} gewaehlteLektionIds
  * @returns {Pick<Eingrenzung, 'wissensstufen' | 'lektionen'>}
  */
 export function verdichteAuswahl(katalog, gewaehlteLektionIds) {
+  const alle = alleLektionIds(katalog);
+  if (alle.size > 0 && [...alle].every((id) => gewaehlteLektionIds.has(id))) {
+    return { wissensstufen: [], lektionen: [] };
+  }
+
   /** @type {string[]} */
   const wissensstufen = [];
   /** @type {string[]} */

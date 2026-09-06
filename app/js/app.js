@@ -6,8 +6,8 @@
 /** @import { Pruefungsstand } from './pruefung.js' */
 import { ladeKatalog, bezeichneFrage, findeLektion, findeWissensstufe } from './katalog.js';
 import { mische } from './mischen.js';
-import { erzeugeLernEngine, LEERE_EINGRENZUNG, istEingegrenzt } from './lernengine.js';
-import { baueStufenMitLektionen, stufenZustand, verdichteAuswahl } from './eingrenzungsbaum.js';
+import { erzeugeLernEngine, istEingegrenzt } from './lernengine.js';
+import { baueStufenMitLektionen, stufenZustand, verdichteAuswahl, alleLektionIds } from './eingrenzungsbaum.js';
 import { browserSpeicher } from './lernstand.js';
 import { starteRouting } from './routing.js';
 import {
@@ -238,7 +238,7 @@ function beschreibeEingrenzung(eingrenzung) {
     });
     teile.push(titel.join(', '));
   }
-  let text = teile.length > 0 ? teile.join(' · ') : 'Alle Fragen';
+  let text = teile.length > 0 ? teile.join(' · ') : 'Alle Lektionen';
   if (eingrenzung.nurProblemfragen) text += ' + Nur Problemfragen';
   return text;
 }
@@ -343,9 +343,14 @@ function renderEingrenzungsBaum() {
   anzeige.eingrenzungBaum.replaceChildren(...stufen.map(baueStufeZeile));
 }
 
-/** Baut den Baum erstmalig auf; alle Stufen starten aufgeklappt. */
+/**
+ * Baut den Baum erstmalig auf: alle Stufen starten aufgeklappt, alle
+ * Lektionen-Kaestchen starten angehakt (keine Einschraenkung ist so sichtbar
+ * "alles angehakt" statt aus einer leeren Auswahl abgeleitet).
+ */
 function initialisiereEingrenzungsBaum() {
   offeneStufen = new Set(katalog.metadaten.wissensstufen.map((stufe) => stufe.id));
+  baumAuswahl = alleLektionIds(katalog);
   renderEingrenzungsBaum();
 }
 
@@ -796,7 +801,8 @@ anzeige.eingrenzungBaum.addEventListener('click', (ereignis) => {
 
 anzeige.problemfragenUeben.addEventListener('click', () => {
   engine.setzeEingrenzung({ wissensstufen: [], lektionen: [], nurProblemfragen: true });
-  baumAuswahl = new Set();
+  // Keine Lektionen-Einschraenkung: der Baum zeigt das als "alles angehakt".
+  baumAuswahl = alleLektionIds(katalog);
   anzeige.eingrenzungProblemfragen.checked = true;
   renderEingrenzungsBaum();
   window.location.hash = '#/ueben';

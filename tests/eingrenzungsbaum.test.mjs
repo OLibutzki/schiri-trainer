@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { baueStufenMitLektionen, stufenZustand, verdichteAuswahl } from '../app/js/eingrenzungsbaum.js';
+import { baueStufenMitLektionen, stufenZustand, verdichteAuswahl, alleLektionIds } from '../app/js/eingrenzungsbaum.js';
 
 /** Katalog mit zwei Wissensstufen, je zwei Lektionen (der reale Katalog kennt bislang nur eine). */
 function katalogMitZweiStufen() {
@@ -78,4 +78,19 @@ test('verdichteAuswahl kombiniert mehrere Stufen und Teilauswahlen', () => {
 test('verdichteAuswahl ohne jede Auswahl liefert leere Teilmengen', () => {
   const katalog = katalogMitZweiStufen();
   assert.deepEqual(verdichteAuswahl(katalog, new Set()), { wissensstufen: [], lektionen: [] });
+});
+
+test('alleLektionIds enthaelt jede Lektion-Id des Katalogs', () => {
+  const katalog = katalogMitZweiStufen();
+  assert.deepEqual(
+    alleLektionIds(katalog),
+    new Set(['basiswissen-1', 'basiswissen-2', 'aufbauwissen-1', 'aufbauwissen-2']),
+  );
+});
+
+test('verdichteAuswahl liefert leere Teilmengen, wenn wirklich jede Lektion angehakt ist', () => {
+  // Der Ausgangszustand des Baums: alle Kaestchen angehakt bedeutet keine
+  // Einschraenkung, nicht eine Liste aller Wissensstufen.
+  const katalog = katalogMitZweiStufen();
+  assert.deepEqual(verdichteAuswahl(katalog, alleLektionIds(katalog)), { wissensstufen: [], lektionen: [] });
 });
