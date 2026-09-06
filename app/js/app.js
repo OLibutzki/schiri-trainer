@@ -4,7 +4,7 @@
 /** @import { Katalog } from './typen.js' */
 /** @import { LernfortschrittTeil, Eingrenzung, Meisterungswechsel } from './lernengine.js' */
 /** @import { Pruefungsstand } from './pruefung.js' */
-import { ladeKatalog, bezeichneFrage } from './katalog.js';
+import { ladeKatalog, bezeichneFrage, findeLektion } from './katalog.js';
 import { istAbgabeMoeglich } from './antwort.js';
 import { mische } from './mischen.js';
 import { erzeugeLernEngine, istEingegrenzt } from './lernengine.js';
@@ -17,6 +17,7 @@ import {
   istAbgeschlossen,
   beantworte as beantwortePruefung,
   ergebnis as auswertePruefung,
+  beschreibePruefungsEingrenzung,
 } from './pruefung.js';
 import {
   liesOffenePruefung,
@@ -76,6 +77,7 @@ const anzeige = {
   pruefungStarten: /** @type {HTMLButtonElement} */ (element('pruefung-starten')),
 
   pruefungLaufend: element('pruefung-laufend'),
+  pruefungEingrenzung: element('pruefung-eingrenzung'),
   pruefungFortschritt: element('pruefung-fortschritt'),
   pruefungFrageText: element('pruefung-frage-text'),
   pruefungFormular: /** @type {HTMLFormElement} */ (element('pruefung-formular')),
@@ -85,6 +87,7 @@ const anzeige = {
   pruefungAbbrechen: /** @type {HTMLButtonElement} */ (element('pruefung-abbrechen')),
 
   pruefungErgebnis: element('pruefung-ergebnis'),
+  pruefungErgebnisEingrenzung: element('pruefung-ergebnis-eingrenzung'),
   pruefungPunktzahl: element('pruefung-punktzahl'),
   pruefungAlleRichtig: element('pruefung-alle-richtig'),
   pruefungFalscheTitel: element('pruefung-falsche-titel'),
@@ -198,6 +201,7 @@ function zeigeFrage(frage) {
   anzeige.optionen.replaceChildren(...baueOptionenListe(frage));
 
   anzeige.formular.hidden = false;
+  anzeige.abgeben.hidden = false;
   // Erst mit angekreuzter Option abgebbar (Issue #27); der change-Listener
   // auf anzeige.optionen haelt den Zustand danach synchron.
   anzeige.abgeben.disabled = true;
@@ -235,12 +239,21 @@ function beschreibeEingrenzung(eingrenzung) {
     text = 'Alle Lektionen';
   } else if (eingrenzung.lektionen.length === 0) {
     text = 'Keine Lektionen';
+  } else if (eingrenzung.lektionen.length <= 3) {
+    // Bis zu drei Lektionsnummern ausschreiben statt nur zu zaehlen: Anders
+    // als die vollen Titel sind die Nummern kurz genug fuer die Summary-Zeile
+    // und nennen, welche Lektionen gemeint sind (Issue #34).
+    const nummern = eingrenzung.lektionen
+      .map((id) => findeLektion(katalog, id)?.nummer)
+      .filter((nummer) => nummer !== undefined)
+      .sort((a, b) => a - b);
+    text = nummern.length === 1 ? `Lektion ${nummern[0]}` : `Lektionen ${nummern.join(', ')}`;
   } else {
-    // Nur die Anzahl statt jeden Titel: Bei vielen angehakten Lektionen
-    // (typisch, da der Baum mit allen angehakten Kaestchen startet) waere
-    // eine Aufzaehlung aller Titel zu lang fuer die Summary-Zeile.
+    // Ab vier Lektionen faellt es auf die Anzahl zurueck: Bei vielen
+    // angehakten Lektionen (typisch, da der Baum mit allen angehakten
+    // Kaestchen startet) waere eine Aufzaehlung zu lang fuer die Summary-Zeile.
     const anzahl = eingrenzung.lektionen.length;
-    text = `${anzahl} ${anzahl === 1 ? 'Lektion' : 'Lektionen'}`;
+    text = `${anzahl} Lektionen`;
   }
   if (eingrenzung.nurProblemfragen) text += ' + Nur Problemfragen';
   return text;
@@ -430,6 +443,11 @@ function zeigePruefungsfrage() {
   const index = offenerIndex(pruefungsstand);
   const frageId = pruefungsstand.frageIds[index];
   anzeige.pruefungFortschritt.textContent = `Frage ${index + 1} von ${pruefungsstand.frageIds.length}`;
+  // Nennt die eigene Eingrenzung der Pruefung, statt sie zu verschweigen
+  // (Issue #34); bleibt verborgen, wenn die Pruefung ueber den ganzen Katalog laeuft.
+  const eingrenzung = beschreibePruefungsEingrenzung(katalog, pruefungsstand);
+  anzeige.pruefungEingrenzung.textContent = eingrenzung ?? '';
+  anzeige.pruefungEingrenzung.hidden = eingrenzung === null;
   if (frageId === pruefungAngezeigteFrage) return;
 
   const frage = /** @type {Frage} */ (katalog.fragen.find((kandidat) => kandidat.id === frageId));
@@ -465,6 +483,10 @@ function zeichnePruefung() {
   anzeige.pruefungLaufend.hidden = true;
   anzeige.pruefungAbbrechenAbschnitt.hidden = true;
   anzeige.pruefungErgebnis.hidden = false;
+
+  const eingrenzung = beschreibePruefungsEingrenzung(katalog, pruefungsstand);
+  anzeige.pruefungErgebnisEingrenzung.textContent = eingrenzung ?? '';
+  anzeige.pruefungErgebnisEingrenzung.hidden = eingrenzung === null;
 
   const auswertung = auswertePruefung(katalog, pruefungsstand);
   anzeige.pruefungPunktzahl.textContent = `${auswertung.punktzahl} von ${auswertung.gesamt} Fragen richtig beantwortet.`;
@@ -588,7 +610,9 @@ function werteAus() {
   beantwortet = true;
   markiereBewertung(kaestchen(), gewaehlt, bewertung);
 
-  anzeige.abgeben.disabled = true;
+  // Ausblenden statt Deaktivieren: Sonst bliebe der Knopf als tote Flaeche
+  // zwischen den Optionen und "Naechste Frage" stehen (Issue #34).
+  anzeige.abgeben.hidden = true;
   anzeige.urteil.textContent = bewertung.richtig ? 'Richtig' : 'Falsch';
   anzeige.rueckmeldung.classList.add(bewertung.richtig ? 'rueckmeldung--richtig' : 'rueckmeldung--falsch');
   anzeige.rueckmeldung.hidden = false;
@@ -639,6 +663,14 @@ function zeichneLernfortschritt() {
     ...problemfragen.map((frage) => {
       const zeile = document.createElement('li');
 
+      // Ein Knopf statt reinem Text: Fuehrt gezielt zu genau dieser Frage im
+      // Uebungsmodus, statt nur ueber "Problemfragen üben" eine zufaellige
+      // von allen anzubieten (Issue #34).
+      const eintrag = document.createElement('button');
+      eintrag.type = 'button';
+      eintrag.className = 'problemfrage-eintrag';
+      eintrag.addEventListener('click', () => uebeProblemfrage(frage));
+
       const kennung = document.createElement('span');
       kennung.className = 'problemfrage-kennung';
       kennung.textContent = bezeichneFrage(katalog, frage);
@@ -647,10 +679,27 @@ function zeichneLernfortschritt() {
       text.className = 'problemfrage-text';
       text.textContent = frage.text;
 
-      zeile.append(kennung, text);
+      eintrag.append(kennung, text);
+      zeile.append(eintrag);
       return zeile;
     }),
   );
+}
+
+/**
+ * Wechselt in den Uebungsmodus mit exakt der uebergebenen Problemfrage. Die
+ * Eingrenzung wie bei "Problemfragen üben" (nur Problemfragen, keine
+ * Lektionen-Einschraenkung) stellt sicher, dass die Frage zugelassen bleibt
+ * und `ZEICHNER.ueben` sie nicht sofort durch eine andere ersetzt.
+ * @param {Frage} frage
+ */
+function uebeProblemfrage(frage) {
+  engine.setzeEingrenzung({ lektionen: null, nurProblemfragen: true });
+  baumAuswahl = alleLektionIds(katalog);
+  anzeige.eingrenzungProblemfragen.checked = true;
+  renderEingrenzungsBaum();
+  zeigeFrage(frage);
+  window.location.hash = '#/ueben';
 }
 
 /**

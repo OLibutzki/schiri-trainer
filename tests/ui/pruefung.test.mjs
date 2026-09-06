@@ -99,6 +99,16 @@ test('laesst den Lernfortschritt von einer Pruefung unberuehrt', async () => {
   assert.equal(await seite.textContent('#kopf-anteil'), vorher, 'Lernfortschritt hat sich veraendert');
 });
 
+test('verschweigt die Eingrenzung nicht, zeigt aber keine ungefragte Zeile ohne Wissensstufen-Auswahl', async () => {
+  // Der ausgelieferte Katalog kennt nur eine Wissensstufe: Die Pruefung laeuft
+  // damit immer ohne Eingrenzung, und die Zusatzzeile bleibt entsprechend
+  // verborgen (siehe beschreibePruefungsEingrenzung fuer den Fall mit
+  // Eingrenzung, unit-getestet in tests/pruefung.test.mjs).
+  const seite = await oeffne(umgebung.browser, umgebung.adresse, { ansicht: '/pruefung' });
+  await starte(seite);
+  assert.ok(!(await seite.isVisible('#pruefung-eingrenzung')), 'Eingrenzungszeile erscheint ohne Eingrenzung');
+});
+
 test('gibt keine Pruefungsantwort ohne Auswahl ab', async () => {
   const seite = await oeffne(umgebung.browser, umgebung.adresse, { ansicht: '/pruefung' });
   await starte(seite);

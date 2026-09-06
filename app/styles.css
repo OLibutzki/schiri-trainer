@@ -513,10 +513,22 @@ body {
 }
 
 .problemfragen li {
-  padding: 0.75rem;
   background: var(--flaeche);
   border: 1px solid var(--rand);
   border-radius: 0.5rem;
+}
+
+.problemfrage-eintrag {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  background: none;
+  border: none;
+  border-radius: inherit;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .problemfrage-kennung {

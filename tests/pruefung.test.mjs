@@ -1,6 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { erzeugePruefung, offenerIndex, istAbgeschlossen, beantworte, ergebnis } from '../app/js/pruefung.js';
+import {
+  erzeugePruefung,
+  offenerIndex,
+  istAbgeschlossen,
+  beantworte,
+  ergebnis,
+  beschreibePruefungsEingrenzung,
+} from '../app/js/pruefung.js';
 
 /** Eine feste Zufallsfolge, damit Ziehungen reproduzierbar sind. */
 function festerZufall(saat = 1) {
@@ -79,6 +86,16 @@ test('mehr angeforderte Fragen als die Kandidatenmenge hergibt fuehren zur gesam
   const stand = erzeugePruefung({ katalog: katalog(), fragenzahl: 50, wissensstufe: 'basiswissen', zufall: festerZufall() });
   assert.equal(stand.frageIds.length, 10);
   assert.equal(new Set(stand.frageIds).size, 10);
+});
+
+test('nennt Wissensstufe und Umfang, wenn auf eine Wissensstufe eingegrenzt wurde', () => {
+  const stand = erzeugePruefung({ katalog: katalog(), fragenzahl: 10, wissensstufe: 'basiswissen', zufall: festerZufall() });
+  assert.equal(beschreibePruefungsEingrenzung(katalog(), stand), 'Basiswissen · 10 Fragen');
+});
+
+test('nennt keine Eingrenzung, wenn die Pruefung ueber den ganzen Katalog laeuft', () => {
+  const stand = erzeugePruefung({ katalog: katalog(), fragenzahl: 15, zufall: festerZufall() });
+  assert.equal(beschreibePruefungsEingrenzung(katalog(), stand), null);
 });
 
 test('eine neue Pruefung ist zu Beginn vollstaendig unbeantwortet', () => {
