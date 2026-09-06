@@ -140,11 +140,14 @@ function kaestchen() {
 /**
  * Baut eine einzelne Optionszeile: Kaestchen plus Text, ohne Zustand. Der
  * Buchstabe ist nur intern die Kennung einer Option (Formatdetail, siehe
- * docs/katalogformat.md) und wird nicht angezeigt.
+ * docs/katalogformat.md) und wird nicht angezeigt. Eine uebergebene Position
+ * erscheint als kleine Zifferntaste (Uebungs-/Pruefungsoptionen); ohne
+ * Position entfaellt sie (Rueckblick auf eine bereits beantwortete Frage).
  * @param {Option} option
+ * @param {number | null} [position]
  * @returns {HTMLLIElement}
  */
-function baueOptionZeile(option) {
+function baueOptionZeile(option, position = null) {
   const eintrag = document.createElement('li');
   const feld = document.createElement('label');
   feld.className = 'option';
@@ -159,7 +162,18 @@ function baueOptionZeile(option) {
   const text = document.createElement('span');
   text.textContent = option.text;
 
-  feld.append(optionskaestchen, text);
+  if (position === null) {
+    feld.append(optionskaestchen, text);
+  } else {
+    // Die Zifferntaste zeigt die Position, nicht den Original-Buchstaben: Nur
+    // die Position ist am Bildschirm sichtbar mit einer Taste verknuepft.
+    const taste = document.createElement('span');
+    taste.className = 'option-taste';
+    taste.textContent = String(position);
+    taste.setAttribute('aria-hidden', 'true');
+    feld.append(optionskaestchen, taste, text);
+  }
+
   eintrag.append(feld);
   return eintrag;
 }
@@ -171,7 +185,7 @@ function baueOptionZeile(option) {
  * @returns {HTMLLIElement[]}
  */
 function baueOptionenListe(frage) {
-  return mische(frage.optionen).map(baueOptionZeile);
+  return mische(frage.optionen).map((option, index) => baueOptionZeile(option, index + 1));
 }
 
 /** @param {Frage} frage */
@@ -478,7 +492,7 @@ function markiereBewertung(kaestchenListe, gewaehlt, bewertung) {
 function baueOptionenRueckblick(frage, gewaehlt, bewertung) {
   const liste = document.createElement('ul');
   liste.className = 'optionen';
-  liste.append(...frage.optionen.map(baueOptionZeile));
+  liste.append(...frage.optionen.map((option) => baueOptionZeile(option)));
   markiereBewertung(kaestchenIn(liste), gewaehlt, bewertung);
   return liste;
 }
@@ -608,6 +622,72 @@ function zeigeHerkunft() {
     `${herkunft}. Regelstand: ${datum(regelstand)}, ` +
     `Regeln gültig ab ${datum(regelnGueltigAb)}.`;
 }
+
+/**
+ * @typedef {object} TastaturKontext
+ * @property {HTMLElement} liste Die Optionenliste der aktiven Frage.
+ * @property {HTMLFormElement} formular Sein umschliessendes Formular.
+ * @property {HTMLElement | null} weiter Sichtbar, wenn Enter stattdessen weiterblaettern soll.
+ */
+
+/**
+ * Der Tastatur-Kontext der gerade aktiven Ansicht, oder `null`, wenn keine
+ * Optionenliste bedienbar ist. Uebungs- und Pruefungsmodus haben je eine
+ * eigene Optionenliste; ausserhalb einer laufenden Frage gibt es keinen
+ * Kontext, und Zifferntasten/Eingabetaste bleiben wirkungslos.
+ * @returns {TastaturKontext | null}
+ */
+function tastaturKontext() {
+  if (!anzeige.ansichten.ueben.hidden && aktuelleFrage !== null) {
+    return { liste: anzeige.optionen, formular: anzeige.formular, weiter: beantwortet ? anzeige.weiter : null };
+  }
+  if (!anzeige.ansichten.pruefung.hidden && pruefungsstand !== null && !istAbgeschlossen(pruefungsstand)) {
+    return { liste: anzeige.pruefungOptionen, formular: anzeige.pruefungFormular, weiter: null };
+  }
+  return null;
+}
+
+/**
+ * Zifferntasten waehlen die zugehoerige Option an und wieder ab, die
+ * Eingabetaste bestaetigt die Antwort und blaettert anschliessend weiter.
+ * Wirkt in Uebungs- und Pruefungsmodus gleichermassen (Issue #9). Eine offene
+ * Bestaetigungsabfrage des Browsers (window.confirm) blockiert den
+ * Haupt-Thread ohnehin, so dass in dieser Zeit kein Tastendruck ankommt.
+ * @param {KeyboardEvent} ereignis
+ */
+function behandleTastatur(ereignis) {
+  // Tastenkombinationen mit Zusatztaste (etwa Strg+1 fuer einen Browser-Tab)
+  // bleiben unangetastet.
+  if (ereignis.ctrlKey || ereignis.metaKey || ereignis.altKey) return;
+
+  // Fokussierte native Bedienelemente behalten ihre eigene Tastaturbedienung
+  // fuer Enter und Ziffern: Ein Verweis oder eine Schaltflaeche (z. B. die
+  // Navigation oder "Prüfung abbrechen") soll sich weiterhin ganz normal per
+  // Enter aktivieren lassen, statt stattdessen die Antwort abzugeben.
+  const ziel = ereignis.target;
+  if (ziel instanceof HTMLSelectElement || ziel instanceof HTMLButtonElement || ziel instanceof HTMLAnchorElement) {
+    return;
+  }
+
+  const kontext = tastaturKontext();
+  if (!kontext) return;
+
+  if (ereignis.key === 'Enter') {
+    ereignis.preventDefault();
+    if (kontext.weiter) kontext.weiter.click();
+    else kontext.formular.requestSubmit();
+    return;
+  }
+
+  const position = Number(ereignis.key);
+  if (!Number.isInteger(position) || position < 1) return;
+  const feld = kaestchenIn(kontext.liste)[position - 1];
+  if (!feld || feld.disabled) return;
+  ereignis.preventDefault();
+  feld.checked = !feld.checked;
+}
+
+window.addEventListener('keydown', behandleTastatur);
 
 anzeige.formular.addEventListener('submit', (ereignis) => {
   ereignis.preventDefault();
