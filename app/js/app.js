@@ -1,4 +1,4 @@
-/** @import { Frage } from './typen.js' */
+/** @import { Frage, Option } from './typen.js' */
 /** @import { Ansicht } from './routing.js' */
 /** @import { Bewertung } from './antwort.js' */
 /** @import { Katalog } from './typen.js' */
@@ -86,6 +86,7 @@ const anzeige = {
   pruefungErgebnis: element('pruefung-ergebnis'),
   pruefungPunktzahl: element('pruefung-punktzahl'),
   pruefungAlleRichtig: element('pruefung-alle-richtig'),
+  pruefungFalscheTitel: element('pruefung-falsche-titel'),
   pruefungFalsche: element('pruefung-falsche'),
   pruefungNeu: /** @type {HTMLButtonElement} */ (element('pruefung-neu')),
 
@@ -137,33 +138,40 @@ function kaestchen() {
 }
 
 /**
+ * Baut eine einzelne Optionszeile: Kaestchen plus Text, ohne Zustand. Der
+ * Buchstabe ist nur intern die Kennung einer Option (Formatdetail, siehe
+ * docs/katalogformat.md) und wird nicht angezeigt.
+ * @param {Option} option
+ * @returns {HTMLLIElement}
+ */
+function baueOptionZeile(option) {
+  const eintrag = document.createElement('li');
+  const feld = document.createElement('label');
+  feld.className = 'option';
+
+  const optionskaestchen = document.createElement('input');
+  // Bewusst immer Mehrfachauswahl: Ein an die Frage angepasstes Bedienelement
+  // wuerde verraten, wie viele Optionen korrekt sind.
+  optionskaestchen.type = 'checkbox';
+  optionskaestchen.name = 'option';
+  optionskaestchen.value = option.buchstabe;
+
+  const text = document.createElement('span');
+  text.textContent = option.text;
+
+  feld.append(optionskaestchen, text);
+  eintrag.append(feld);
+  return eintrag;
+}
+
+/**
  * Baut die Optionenliste einer Frage. Die Reihenfolge wechselt bei jeder
- * Anzeige, damit sich der Anwender den Inhalt merkt. Der Buchstabe ist nur
- * intern die Kennung einer Option (Formatdetail, siehe docs/katalogformat.md)
- * und wird nicht angezeigt.
+ * Anzeige, damit sich der Anwender den Inhalt merkt und nicht die Position.
  * @param {Frage} frage
  * @returns {HTMLLIElement[]}
  */
 function baueOptionenListe(frage) {
-  return mische(frage.optionen).map((option) => {
-    const eintrag = document.createElement('li');
-    const feld = document.createElement('label');
-    feld.className = 'option';
-
-    const optionskaestchen = document.createElement('input');
-    // Bewusst immer Mehrfachauswahl: Ein an die Frage angepasstes Bedienelement
-    // wuerde verraten, wie viele Optionen korrekt sind.
-    optionskaestchen.type = 'checkbox';
-    optionskaestchen.name = 'option';
-    optionskaestchen.value = option.buchstabe;
-
-    const text = document.createElement('span');
-    text.textContent = option.text;
-
-    feld.append(optionskaestchen, text);
-    eintrag.append(feld);
-    return eintrag;
-  });
+  return mische(frage.optionen).map(baueOptionZeile);
 }
 
 /** @param {Frage} frage */
@@ -231,18 +239,21 @@ function zeichneEingrenzung() {
   if (eingrenzung) anzeige.eingrenzungBeschreibung.textContent = beschreibeEingrenzung(eingrenzung);
 }
 
+/** @returns {HTMLOptionElement[]} Je eine <option> pro Wissensstufe, nach Reihenfolge sortiert. */
+function baueWissensstufenOptionen() {
+  return [...katalog.metadaten.wissensstufen]
+    .sort((a, b) => a.reihenfolge - b.reihenfolge)
+    .map((stufe) => {
+      const option = document.createElement('option');
+      option.value = stufe.id;
+      option.textContent = stufe.name;
+      return option;
+    });
+}
+
 /** Fuellt Wissensstufen-Auswahl und Lektionen-Liste der Eingrenzung. */
 function fuelleEingrenzungsAuswahl() {
-  anzeige.eingrenzungWissensstufe.append(
-    ...[...katalog.metadaten.wissensstufen]
-      .sort((a, b) => a.reihenfolge - b.reihenfolge)
-      .map((stufe) => {
-        const option = document.createElement('option');
-        option.value = stufe.id;
-        option.textContent = stufe.name;
-        return option;
-      }),
-  );
+  anzeige.eingrenzungWissensstufe.append(...baueWissensstufenOptionen());
 
   anzeige.eingrenzungLektionen.replaceChildren(
     ...katalog.metadaten.lektionen.map((lektion) => {
@@ -318,16 +329,7 @@ function fuellePruefungsWissensstufen() {
     anzeige.pruefungWissensstufeFeld.hidden = true;
     return;
   }
-  anzeige.pruefungWissensstufe.append(
-    ...[...katalog.metadaten.wissensstufen]
-      .sort((a, b) => a.reihenfolge - b.reihenfolge)
-      .map((stufe) => {
-        const option = document.createElement('option');
-        option.value = stufe.id;
-        option.textContent = stufe.name;
-        return option;
-      }),
-  );
+  anzeige.pruefungWissensstufe.append(...baueWissensstufenOptionen());
 }
 
 /**
@@ -376,6 +378,7 @@ function zeichnePruefung() {
   const auswertung = auswertePruefung(katalog, pruefungsstand);
   anzeige.pruefungPunktzahl.textContent = `${auswertung.punktzahl} von ${auswertung.gesamt} Fragen richtig beantwortet.`;
   anzeige.pruefungAlleRichtig.hidden = auswertung.falsche.length > 0;
+  anzeige.pruefungFalscheTitel.hidden = auswertung.falsche.length === 0;
   anzeige.pruefungFalsche.replaceChildren(
     ...auswertung.falsche.map(({ frage, gewaehlt, bewertung }) => {
       const zeile = document.createElement('li');
@@ -475,24 +478,7 @@ function markiereBewertung(kaestchenListe, gewaehlt, bewertung) {
 function baueOptionenRueckblick(frage, gewaehlt, bewertung) {
   const liste = document.createElement('ul');
   liste.className = 'optionen';
-  liste.append(
-    ...frage.optionen.map((option) => {
-      const eintrag = document.createElement('li');
-      const feld = document.createElement('label');
-      feld.className = 'option';
-
-      const optionskaestchen = document.createElement('input');
-      optionskaestchen.type = 'checkbox';
-      optionskaestchen.value = option.buchstabe;
-
-      const text = document.createElement('span');
-      text.textContent = option.text;
-
-      feld.append(optionskaestchen, text);
-      eintrag.append(feld);
-      return eintrag;
-    }),
-  );
+  liste.append(...frage.optionen.map(baueOptionZeile));
   markiereBewertung(kaestchenIn(liste), gewaehlt, bewertung);
   return liste;
 }
