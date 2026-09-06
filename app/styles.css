@@ -421,6 +421,28 @@ body {
   color: var(--schrift);
 }
 
+.pruefung-falsche {
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pruefung-falsche li {
+  padding: 0.75rem;
+  background: var(--flaeche);
+  border: 1px solid var(--falsch);
+  border-radius: 0.5rem;
+}
+
+.pruefung-falsche p {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  color: var(--schrift-leise);
+}
+
 .fuss {
   margin-top: 2rem;
   padding-top: 1rem;

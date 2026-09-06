@@ -3,11 +3,25 @@
 /** @import { Bewertung } from './antwort.js' */
 /** @import { Katalog } from './typen.js' */
 /** @import { LernfortschrittTeil, Eingrenzung } from './lernengine.js' */
+/** @import { Pruefungsstand } from './pruefung.js' */
 import { ladeKatalog, bezeichneFrage, findeLektion, findeWissensstufe } from './katalog.js';
 import { mische } from './mischen.js';
 import { erzeugeLernEngine } from './lernengine.js';
 import { browserSpeicher } from './lernstand.js';
 import { starteRouting } from './routing.js';
+import {
+  erzeugePruefung,
+  offenerIndex,
+  istAbgeschlossen,
+  beantworte as beantwortePruefung,
+  ergebnis as auswertePruefung,
+} from './pruefung.js';
+import {
+  liesOffenePruefung,
+  schreibeOffenePruefung,
+  verwirfOffenePruefung,
+  PRUEFUNGSSTAND_SCHLUESSEL,
+} from './pruefungsstand.js';
 
 /**
  * @param {string} id
@@ -28,12 +42,14 @@ const anzeige = {
   ansichten: {
     start: element('ansicht-start'),
     ueben: element('ansicht-ueben'),
+    pruefung: element('ansicht-pruefung'),
     lernfortschritt: element('ansicht-lernfortschritt'),
   },
 
   startAnteil: element('start-anteil'),
   startBalken: /** @type {HTMLProgressElement} */ (element('start-balken')),
   startErlaeuterung: element('start-erlaeuterung'),
+  pruefungFortsetzenHinweis: element('pruefung-fortsetzen-hinweis'),
 
   frageKennung: element('frage-kennung'),
   frageText: element('frage-text'),
@@ -54,6 +70,25 @@ const anzeige = {
   eingrenzungLektionen: element('eingrenzung-lektionen'),
   eingrenzungUebernehmen: /** @type {HTMLButtonElement} */ (element('eingrenzung-uebernehmen')),
 
+  pruefungEinrichtung: element('pruefung-einrichtung'),
+  pruefungFragenzahl: /** @type {HTMLSelectElement} */ (element('pruefung-fragenzahl')),
+  pruefungWissensstufe: /** @type {HTMLSelectElement} */ (element('pruefung-wissensstufe')),
+  pruefungStarten: /** @type {HTMLButtonElement} */ (element('pruefung-starten')),
+
+  pruefungLaufend: element('pruefung-laufend'),
+  pruefungFortschritt: element('pruefung-fortschritt'),
+  pruefungFrageText: element('pruefung-frage-text'),
+  pruefungFormular: /** @type {HTMLFormElement} */ (element('pruefung-formular')),
+  pruefungOptionen: element('pruefung-optionen'),
+  pruefungAbgeben: /** @type {HTMLButtonElement} */ (element('pruefung-abgeben')),
+  pruefungAbbrechen: /** @type {HTMLButtonElement} */ (element('pruefung-abbrechen')),
+
+  pruefungErgebnis: element('pruefung-ergebnis'),
+  pruefungPunktzahl: element('pruefung-punktzahl'),
+  pruefungAlleRichtig: element('pruefung-alle-richtig'),
+  pruefungFalsche: element('pruefung-falsche'),
+  pruefungNeu: /** @type {HTMLButtonElement} */ (element('pruefung-neu')),
+
   lernfortschrittGesamt: element('lernfortschritt-gesamt'),
   lernfortschrittWissensstufen: element('lernfortschritt-wissensstufen'),
   lernfortschrittLektionen: element('lernfortschritt-lektionen'),
@@ -67,23 +102,71 @@ const anzeige = {
 let katalog;
 /** @type {ReturnType<typeof erzeugeLernEngine>} */
 let engine;
+/** @type {import('./lernstand.js').Speicher} Getrennt vom Lernfortschritt (Issue #8). */
+let pruefungSpeicher;
 /** @type {Frage | null} */
 let aktuelleFrage = null;
 /** Ob die angezeigte Frage bereits ausgewertet wurde. */
 let beantwortet = false;
+/** @type {Pruefungsstand | null} Keine laufende oder abgeschlossene Pruefung, solange `null`. */
+let pruefungsstand = null;
+/**
+ * Die Fragenkennung der zuletzt gezeichneten Pruefungsfrage. Verhindert, dass
+ * ein Ansichtswechsel eine bereits angezeigte, noch unbeantwortete Frage neu
+ * mischt und eine angekreuzte, aber nicht abgegebene Auswahl verwirft.
+ * @type {string | null}
+ */
+let pruefungAngezeigteFrage = null;
 
 /** @param {number} anteil @returns {string} */
 function alsProzent(anteil) {
   return `${Math.round(anteil * 100)} %`;
 }
 
-/** @returns {HTMLInputElement[]} Die Kaestchen der angezeigten Optionen. */
+/**
+ * @param {HTMLElement} liste
+ * @returns {HTMLInputElement[]} Die Kaestchen einer Optionenliste.
+ */
+function kaestchenIn(liste) {
+  return [.../** @type {NodeListOf<HTMLInputElement>} */ (liste.querySelectorAll('input[type="checkbox"]'))];
+}
+
+/** @returns {HTMLInputElement[]} Die Kaestchen der angezeigten Uebungsoptionen. */
 function kaestchen() {
-  return [
-    .../** @type {NodeListOf<HTMLInputElement>} */ (
-      anzeige.optionen.querySelectorAll('input[type="checkbox"]')
-    ),
-  ];
+  return kaestchenIn(anzeige.optionen);
+}
+
+/**
+ * Baut die Optionenliste einer Frage. Die Reihenfolge wechselt bei jeder
+ * Anzeige, damit sich der Anwender den Inhalt merkt und nicht die Position;
+ * der Original-Buchstabe bleibt sichtbar.
+ * @param {Frage} frage
+ * @returns {HTMLLIElement[]}
+ */
+function baueOptionenListe(frage) {
+  return mische(frage.optionen).map((option) => {
+    const eintrag = document.createElement('li');
+    const feld = document.createElement('label');
+    feld.className = 'option';
+
+    const optionskaestchen = document.createElement('input');
+    // Bewusst immer Mehrfachauswahl: Ein an die Frage angepasstes Bedienelement
+    // wuerde verraten, wie viele Optionen korrekt sind.
+    optionskaestchen.type = 'checkbox';
+    optionskaestchen.name = 'option';
+    optionskaestchen.value = option.buchstabe;
+
+    const buchstabe = document.createElement('span');
+    buchstabe.className = 'option-buchstabe';
+    buchstabe.textContent = `${option.buchstabe})`;
+
+    const text = document.createElement('span');
+    text.textContent = option.text;
+
+    feld.append(optionskaestchen, buchstabe, text);
+    eintrag.append(feld);
+    return eintrag;
+  });
 }
 
 /** @param {Frage} frage */
@@ -92,34 +175,7 @@ function zeigeFrage(frage) {
   beantwortet = false;
   anzeige.frageKennung.textContent = bezeichneFrage(katalog, frage);
   anzeige.frageText.textContent = frage.text;
-
-  anzeige.optionen.replaceChildren(
-    // Die Reihenfolge wechselt bei jeder Anzeige, damit sich der Anwender den
-    // Inhalt merkt und nicht die Position. Der Original-Buchstabe bleibt sichtbar.
-    ...mische(frage.optionen).map((option) => {
-      const eintrag = document.createElement('li');
-      const feld = document.createElement('label');
-      feld.className = 'option';
-
-      const optionskaestchen = document.createElement('input');
-      // Bewusst immer Mehrfachauswahl: Ein an die Frage angepasstes Bedienelement
-      // wuerde verraten, wie viele Optionen korrekt sind.
-      optionskaestchen.type = 'checkbox';
-      optionskaestchen.name = 'option';
-      optionskaestchen.value = option.buchstabe;
-
-      const buchstabe = document.createElement('span');
-      buchstabe.className = 'option-buchstabe';
-      buchstabe.textContent = `${option.buchstabe})`;
-
-      const text = document.createElement('span');
-      text.textContent = option.text;
-
-      feld.append(optionskaestchen, buchstabe, text);
-      eintrag.append(feld);
-      return eintrag;
-    }),
-  );
+  anzeige.optionen.replaceChildren(...baueOptionenListe(frage));
 
   anzeige.formular.hidden = false;
   anzeige.abgeben.disabled = false;
@@ -255,6 +311,125 @@ function gewaehlteBuchstaben() {
     .map((feld) => feld.value);
 }
 
+/** Fuellt die Wissensstufen-Auswahl der Pruefungseinrichtung. */
+function fuellePruefungsWissensstufen() {
+  anzeige.pruefungWissensstufe.append(
+    ...[...katalog.metadaten.wissensstufen]
+      .sort((a, b) => a.reihenfolge - b.reihenfolge)
+      .map((stufe) => {
+        const option = document.createElement('option');
+        option.value = stufe.id;
+        option.textContent = stufe.name;
+        return option;
+      }),
+  );
+}
+
+/**
+ * Zeichnet die aktuell offene Frage der laufenden Pruefung neu. Nur wenn sie
+ * sich gegenueber der zuletzt gezeichneten unterscheidet: Sonst wuerde ein
+ * Ansichtswechsel eine angekreuzte, aber nicht abgegebene Auswahl verwerfen
+ * und die Optionen neu mischen, obwohl dieselbe Frage weiter offen ist.
+ */
+function zeigePruefungsfrage() {
+  if (!pruefungsstand) return;
+  const index = offenerIndex(pruefungsstand);
+  const frageId = pruefungsstand.frageIds[index];
+  anzeige.pruefungFortschritt.textContent = `Frage ${index + 1} von ${pruefungsstand.frageIds.length}`;
+  if (frageId === pruefungAngezeigteFrage) return;
+
+  const frage = /** @type {Frage} */ (katalog.fragen.find((kandidat) => kandidat.id === frageId));
+  anzeige.pruefungFrageText.textContent = frage.text;
+  anzeige.pruefungOptionen.replaceChildren(...baueOptionenListe(frage));
+  pruefungAngezeigteFrage = frageId;
+}
+
+/** Zeichnet die Pruefungsansicht: Einrichtung, laufende Pruefung oder Ergebnis. */
+function zeichnePruefung() {
+  if (!pruefungsstand) {
+    anzeige.pruefungEinrichtung.hidden = false;
+    anzeige.pruefungLaufend.hidden = true;
+    anzeige.pruefungAbbrechen.hidden = true;
+    anzeige.pruefungErgebnis.hidden = true;
+    return;
+  }
+
+  anzeige.pruefungEinrichtung.hidden = true;
+
+  if (!istAbgeschlossen(pruefungsstand)) {
+    anzeige.pruefungLaufend.hidden = false;
+    anzeige.pruefungAbbrechen.hidden = false;
+    anzeige.pruefungErgebnis.hidden = true;
+    zeigePruefungsfrage();
+    return;
+  }
+
+  anzeige.pruefungLaufend.hidden = true;
+  anzeige.pruefungAbbrechen.hidden = true;
+  anzeige.pruefungErgebnis.hidden = false;
+
+  const auswertung = auswertePruefung(katalog, pruefungsstand);
+  anzeige.pruefungPunktzahl.textContent = `${auswertung.punktzahl} von ${auswertung.gesamt} Fragen richtig beantwortet.`;
+  anzeige.pruefungAlleRichtig.hidden = auswertung.falsche.length > 0;
+  anzeige.pruefungFalsche.replaceChildren(
+    ...auswertung.falsche.map(({ frage, gewaehlt, bewertung }) => {
+      const zeile = document.createElement('li');
+
+      const kennung = document.createElement('span');
+      kennung.className = 'problemfrage-kennung';
+      kennung.textContent = bezeichneFrage(katalog, frage);
+
+      const text = document.createElement('span');
+      text.className = 'problemfrage-text';
+      text.textContent = frage.text;
+
+      const gegeben = document.createElement('p');
+      gegeben.textContent =
+        gewaehlt.length > 0 ? `Gegeben: ${gewaehlt.map((b) => `${b})`).join(', ')}.` : 'Keine Antwort gegeben.';
+
+      const korrekt = document.createElement('p');
+      korrekt.textContent = `Korrekt: ${bewertung.korrekt.map((b) => `${b})`).join(', ')}.`;
+
+      zeile.append(kennung, text, gegeben, korrekt);
+      return zeile;
+    }),
+  );
+}
+
+/**
+ * Liest die Einrichtung und startet eine neue Pruefung. Eine noch offene
+ * (unabgeschlossene) Prüfung wird dabei erst nach ausdrücklicher Bestätigung
+ * überschrieben.
+ */
+function startePruefung() {
+  if (pruefungsstand && !istAbgeschlossen(pruefungsstand)) {
+    if (!window.confirm('Es gibt eine offene Prüfung. Eine neue Prüfung ersetzt sie unwiderruflich. Fortfahren?')) {
+      return;
+    }
+  }
+  const fragenzahl = Number(anzeige.pruefungFragenzahl.value);
+  const wissensstufe = anzeige.pruefungWissensstufe.value || null;
+  pruefungsstand = erzeugePruefung({ katalog, fragenzahl, wissensstufe });
+  pruefungAngezeigteFrage = null;
+  schreibeOffenePruefung(pruefungSpeicher, pruefungsstand);
+  zeichnePruefung();
+  window.scrollTo({ top: 0 });
+}
+
+function werteAusPruefung() {
+  if (!pruefungsstand) return;
+  const gewaehlt = kaestchenIn(anzeige.pruefungOptionen)
+    .filter((feld) => feld.checked)
+    .map((feld) => feld.value);
+  pruefungsstand = beantwortePruefung(pruefungsstand, gewaehlt);
+  // Abgeschlossen gilt eine Pruefung nicht mehr als „offen“: Es gibt nichts
+  // mehr fortzusetzen, der Zwischenstand wird verworfen statt aufgehoben.
+  if (istAbgeschlossen(pruefungsstand)) verwirfOffenePruefung(pruefungSpeicher);
+  else schreibeOffenePruefung(pruefungSpeicher, pruefungsstand);
+  zeichnePruefung();
+  window.scrollTo({ top: 0 });
+}
+
 function werteAus() {
   if (!aktuelleFrage || beantwortet) return;
   const gewaehlt = gewaehlteBuchstaben();
@@ -339,6 +514,9 @@ function zeichneStart() {
   anzeige.startAnteil.textContent = alsProzent(anteil);
   anzeige.startBalken.value = anteil;
   anzeige.startErlaeuterung.textContent = `${gemeistert} von ${gesamt} Fragen gemeistert.`;
+  // Jeder gehaltene Stand ist unabgeschlossen (siehe werteAusPruefung), also
+  // stets als „offene Prüfung“ anzubieten.
+  anzeige.pruefungFortsetzenHinweis.hidden = pruefungsstand === null;
 }
 
 function zeichneLernfortschritt() {
@@ -384,6 +562,9 @@ const ZEICHNER = {
     zeichneEingrenzung();
     if (aktuelleFrage === null || beantwortet) zeigeNaechsteFrage();
   },
+  // Eine laufende oder abgeschlossene Pruefung ueberdauert ebenfalls einen
+  // Ansichtswechsel; erst „Neue Prüfung" oder „Abbrechen" setzen sie zurueck.
+  pruefung: zeichnePruefung,
 };
 
 /** @param {Ansicht} ansicht */
@@ -447,6 +628,28 @@ anzeige.problemfragenUeben.addEventListener('click', () => {
   window.location.hash = '#/ueben';
 });
 
+anzeige.pruefungStarten.addEventListener('click', startePruefung);
+
+anzeige.pruefungFormular.addEventListener('submit', (ereignis) => {
+  ereignis.preventDefault();
+  werteAusPruefung();
+});
+
+anzeige.pruefungAbbrechen.addEventListener('click', () => {
+  // Bewusst die blockierende Abfrage des Browsers, siehe Lernfortschritt-Reset unten.
+  if (!window.confirm('Die laufende Prüfung abbrechen? Der Zwischenstand geht verloren.')) return;
+  pruefungsstand = null;
+  pruefungAngezeigteFrage = null;
+  verwirfOffenePruefung(pruefungSpeicher);
+  zeichnePruefung();
+});
+
+anzeige.pruefungNeu.addEventListener('click', () => {
+  pruefungsstand = null;
+  pruefungAngezeigteFrage = null;
+  zeichnePruefung();
+});
+
 anzeige.zuruecksetzen.addEventListener('click', () => {
   // Bewusst die blockierende Abfrage des Browsers: Sie ist ohne eigenes
   // Bedienelement zugaenglich und haelt waehrenddessen jede Eingabe an.
@@ -460,8 +663,14 @@ anzeige.zuruecksetzen.addEventListener('click', () => {
 try {
   katalog = await ladeKatalog();
   engine = erzeugeLernEngine({ katalog, speicher: browserSpeicher() });
+  pruefungSpeicher = browserSpeicher(PRUEFUNGSSTAND_SCHLUESSEL);
+  // Jeder ueberlebende Stand ist unabgeschlossen: Eine abgeschlossene Pruefung
+  // wird beim Auswerten sofort verworfen (siehe werteAusPruefung).
+  pruefungsstand = liesOffenePruefung(pruefungSpeicher, katalog);
+  anzeige.pruefungFortsetzenHinweis.hidden = pruefungsstand === null;
   zeigeHerkunft();
   fuelleEingrenzungsAuswahl();
+  fuellePruefungsWissensstufen();
   if (engine.lernstandVerworfen) {
     anzeige.lernstandhinweis.textContent =
       'Ein gespeicherter Lernfortschritt ließ sich nicht deuten und wurde verworfen. ' +
