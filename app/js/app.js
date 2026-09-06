@@ -1,6 +1,5 @@
 /** @import { Frage } from './typen.js' */
 /** @import { Ansicht } from './routing.js' */
-/** @import { Bewertung } from './antwort.js' */
 /** @import { Katalog } from './typen.js' */
 /** @import { LernfortschrittTeil, Eingrenzung } from './lernengine.js' */
 import { ladeKatalog, bezeichneFrage, findeLektion, findeWissensstufe } from './katalog.js';
@@ -42,7 +41,6 @@ const anzeige = {
   abgeben: /** @type {HTMLButtonElement} */ (element('abgeben')),
   rueckmeldung: element('rueckmeldung'),
   urteil: element('rueckmeldung-urteil'),
-  erlaeuterung: element('rueckmeldung-erlaeuterung'),
   weiter: element('weiter'),
   keineFrage: element('keine-frage'),
 
@@ -95,7 +93,8 @@ function zeigeFrage(frage) {
 
   anzeige.optionen.replaceChildren(
     // Die Reihenfolge wechselt bei jeder Anzeige, damit sich der Anwender den
-    // Inhalt merkt und nicht die Position. Der Original-Buchstabe bleibt sichtbar.
+    // Inhalt merkt. Der Buchstabe ist nur intern die Kennung einer Option
+    // (Formatdetail, siehe docs/katalogformat.md) und wird nicht angezeigt.
     ...mische(frage.optionen).map((option) => {
       const eintrag = document.createElement('li');
       const feld = document.createElement('label');
@@ -108,14 +107,10 @@ function zeigeFrage(frage) {
       optionskaestchen.name = 'option';
       optionskaestchen.value = option.buchstabe;
 
-      const buchstabe = document.createElement('span');
-      buchstabe.className = 'option-buchstabe';
-      buchstabe.textContent = `${option.buchstabe})`;
-
       const text = document.createElement('span');
       text.textContent = option.text;
 
-      feld.append(optionskaestchen, buchstabe, text);
+      feld.append(optionskaestchen, text);
       eintrag.append(feld);
       return eintrag;
     }),
@@ -284,26 +279,8 @@ function werteAus() {
   anzeige.abgeben.disabled = true;
   anzeige.urteil.textContent = bewertung.richtig ? 'Richtig' : 'Falsch';
   anzeige.rueckmeldung.classList.add(bewertung.richtig ? 'rueckmeldung--richtig' : 'rueckmeldung--falsch');
-  anzeige.erlaeuterung.textContent = erlaeutere(bewertung);
   anzeige.rueckmeldung.hidden = false;
   anzeige.weiter.focus();
-}
-
-/**
- * @param {Bewertung} bewertung
- * @returns {string}
- */
-function erlaeutere(bewertung) {
-  const alsListe = (/** @type {string[]} */ buchstaben) =>
-    buchstaben.map((buchstabe) => `${buchstabe})`).join(', ');
-  const teile = [`Korrekt ${bewertung.korrekt.length === 1 ? 'ist' : 'sind'}: ${alsListe(bewertung.korrekt)}.`];
-  if (bewertung.zuUnrecht.length > 0) {
-    teile.push(`Zu Unrecht angekreuzt: ${alsListe(bewertung.zuUnrecht)}.`);
-  }
-  if (bewertung.uebersehen.length > 0) {
-    teile.push(`Übersehen: ${alsListe(bewertung.uebersehen)}.`);
-  }
-  return teile.join(' ');
 }
 
 /**
